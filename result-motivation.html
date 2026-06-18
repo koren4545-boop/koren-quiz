@@ -43,7 +43,7 @@
 <div class="hero">
   <div class="hero-tag">✓ האבחון שלך מוכן</div>
   <h1>את מנסה יותר מדי לעזור לו בעצמך</h1>
-  <div class="hero-name" id="greeting"></div>
+  <div class="hero-name">לפיתרון הבעיה — צפי בסרטון</div>
 </div>
 <div class="content">
   <div class="video-card">
@@ -102,7 +102,7 @@
 <script>
   const params = new URLSearchParams(window.location.search);
   const name = params.get('name') || '';
-  if (name) { document.getElementById('greeting').textContent = 'שלום ' + name + '!'; document.getElementById('f-name').value = name; }
+  if (name) { document.getElementById('f-name').value = name; }
   const phone = params.get('phone') || '';
   if (phone) document.getElementById('f-phone').value = phone;
   const age = params.get('age') || '';
