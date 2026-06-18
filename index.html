@@ -1,0 +1,465 @@
+﻿<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>קורן צבר — מצאי את הסיבה שהבן שלך לא יורד במשקל</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #f7f9f8;
+    color: #1a1a1a;
+    direction: rtl;
+    min-height: 100vh;
+  }
+  .top-bar {
+    background: #fff;
+    border-bottom: 1px solid #e8ede9;
+    padding: 14px 20px;
+    text-align: center;
+    font-size: 13px;
+    color: #555;
+    letter-spacing: 0.03em;
+  }
+  .hero {
+    background: linear-gradient(135deg, #2e3d0e 0%, #4a5c1a 100%);
+    color: #fff;
+    text-align: center;
+    padding: 52px 20px 44px;
+  }
+  .hero h1 {
+    font-size: clamp(22px, 5vw, 32px);
+    font-weight: 700;
+    line-height: 1.4;
+    max-width: 620px;
+    margin: 0 auto 14px;
+    color: #ffffff;
+  }
+  .hero p {
+    font-size: 16px;
+    opacity: 0.88;
+    max-width: 480px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+  .quiz-wrap {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 32px 20px 60px;
+  }
+  .progress-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .progress-bar {
+    flex: 1;
+    height: 6px;
+    background: #cdd2b0;
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: #4a5c1a;
+    border-radius: 3px;
+    transition: width 0.4s ease;
+  }
+  .progress-text {
+    font-size: 13px;
+    color: #666;
+    white-space: nowrap;
+    min-width: 90px;
+    text-align: left;
+  }
+  .q-step { display: none; }
+  .q-step.active { display: block; }
+  .q-card {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.07);
+    padding: 28px 28px 20px;
+  }
+  .q-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #4a5c1a;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .q-text {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1a1a1a;
+    line-height: 1.5;
+    margin-bottom: 22px;
+  }
+  .options { display: flex; flex-direction: column; gap: 10px; }
+  .opt {
+    background: #f7f9f8;
+    border: 1.5px solid #e0e8e4;
+    border-radius: 12px;
+    padding: 14px 16px;
+    font-size: 15px;
+    color: #2a2a2a;
+    cursor: pointer;
+    text-align: right;
+    line-height: 1.5;
+    transition: all 0.15s;
+    width: 100%;
+    font-family: inherit;
+  }
+  .opt:hover { border-color: #4a5c1a; background: #e8eccc; }
+  .opt.selected { border-color: #4a5c1a; background: #e5e9d0; color: #2e3d0e; font-weight: 500; }
+  .nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+  }
+  .btn-next {
+    background: #4a5c1a;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 13px 32px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    opacity: 0.4;
+    pointer-events: none;
+    transition: all 0.2s;
+  }
+  .btn-next.ready { opacity: 1; pointer-events: auto; }
+  .btn-next.ready:hover { background: #2e3d0e; }
+  .btn-back {
+    background: none;
+    border: 1.5px solid #ccc;
+    border-radius: 10px;
+    padding: 12px 22px;
+    font-size: 14px;
+    color: #666;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .btn-back:hover { border-color: #999; color: #333; }
+
+  /* Form step */
+  .form-card {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.07);
+    padding: 32px 28px;
+  }
+  .form-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 6px;
+  }
+  .form-sub {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 24px;
+    line-height: 1.5;
+  }
+  .field { margin-bottom: 16px; }
+  .field label {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+    margin-bottom: 6px;
+  }
+  .field input {
+    width: 100%;
+    padding: 13px 14px;
+    border: 1.5px solid #cdd2b0;
+    border-radius: 10px;
+    font-size: 15px;
+    font-family: inherit;
+    color: #1a1a1a;
+    background: #f7f9f8;
+    transition: border-color 0.15s;
+    direction: rtl;
+  }
+  .field input:focus { outline: none; border-color: #4a5c1a; background: #fff; }
+  .submit-btn {
+    width: 100%;
+    background: #4a5c1a;
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    padding: 16px;
+    font-size: 17px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    margin-top: 8px;
+    transition: background 0.2s;
+  }
+  .submit-btn:hover { background: #2e3d0e; }
+  .privacy {
+    font-size: 12px;
+    color: #999;
+    text-align: center;
+    margin-top: 12px;
+  }
+
+  @media (max-width: 480px) {
+    .hero { padding: 36px 16px 32px; }
+    .q-card, .form-card { padding: 20px 16px 16px; }
+    .q-text { font-size: 16px; }
+    .opt { font-size: 14px; padding: 12px 14px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="top-bar">קורן צבר — ליווי כושר ותזונה לנוער</div>
+
+<div class="hero">
+  <h1>מלאי את השאלון וגלי את הסיבה שהבן שלך לא מצליח לרדת במשקל</h1>
+  <p>7 שאלות קצרות- בסוף תדעי בדיוק מה עוצר אותו ואיך לפתור את זה</p>
+</div>
+
+<div class="quiz-wrap">
+  <div class="progress-row">
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div class="progress-text" id="prog-text">שאלה 1 מתוך 7</div>
+  </div>
+
+  <!-- שאלה 1 -->
+  <div class="q-step active" id="step-0">
+    <div class="q-card">
+      <div class="q-label">שאלה 1</div>
+      <div class="q-text">עם איזה משפט את הכי מזדהה?</div>
+      <div class="options">
+        <button class="opt" data-cat="0">הוא התחיל כמה פעמים ותמיד הפסיק באמצע — אף פעם לא הצליח להתמיד</button>
+        <button class="opt" data-cat="1">ניסינו פתרונות רבים — תזונאית, חדר כושר — ושום דבר לא עבד</button>
+        <button class="opt" data-cat="2">הוא אוכל בלי מעקב ובלי שעות קבועות, כל יום מחדש</button>
+        <button class="opt" data-cat="3">הבעיה היא מה שהוא אוכל בחוץ עם חברים — שם הכל מתפרק</button>
+      </div>
+    </div>
+    <div class="nav">
+      <div></div>
+      <button class="btn-next" id="next-0" onclick="goNext(0)">הבא ←</button>
+    </div>
+  </div>
+
+  <!-- שאלה 2 -->
+  <div class="q-step" id="step-1">
+    <div class="q-card">
+      <div class="q-label">שאלה 2</div>
+      <div class="q-text">עם איזה משפט את הכי מזדהה?</div>
+      <div class="options">
+        <button class="opt" data-cat="0">שהוא מתחיל בהתלהבות ומפסיק אחרי שבוע-שבועיים</button>
+        <button class="opt" data-cat="1">שניסינו כבר הכל ואנחנו עדיין באותו מקום</button>
+        <button class="opt" data-cat="2">שאין לי מושג מה הוא אוכל — הוא לא מספר ואני לא יודע</button>
+        <button class="opt" data-cat="3">שהארוחות המשפחתיות הן הארוחות הבריאות היחידות שלו ביום</button>
+      </div>
+    </div>
+    <div class="nav">
+      <button class="btn-back" onclick="goBack(1)">→ חזרה</button>
+      <button class="btn-next" id="next-1" onclick="goNext(1)">הבא ←</button>
+    </div>
+  </div>
+
+  <!-- שאלה 3 -->
+  <div class="q-step" id="step-2">
+    <div class="q-card">
+      <div class="q-label">שאלה 3</div>
+      <div class="q-text">עם איזה משפט את הכי מזדהה?</div>
+      <div class="options">
+        <button class="opt" data-cat="0">הוא ויתר כמה פעמים למרות שהוא לא מרגיש בנוח עם עצמו</button>
+        <button class="opt" data-cat="1">הוא ניסה תוכניות שונות ולא ראה תוצאות ואיבד תקווה</button>
+        <button class="opt" data-cat="2">הוא יודע שהוא אוכל לא טוב אבל לא יודע מאיפה להתחיל לשנות</button>
+        <button class="opt" data-cat="3">הוא מנסה אבל ברגע שהוא עם חברים — הכל מתפרק</button>
+      </div>
+    </div>
+    <div class="nav">
+      <button class="btn-back" onclick="goBack(2)">→ חזרה</button>
+      <button class="btn-next" id="next-2" onclick="goNext(2)">הבא ←</button>
+    </div>
+  </div>
+
+  <!-- שאלה 4 -->
+  <div class="q-step" id="step-3">
+    <div class="q-card">
+      <div class="q-label">שאלה 4</div>
+      <div class="q-text">עם איזה משפט את הכי מזדהה?</div>
+      <div class="options">
+        <button class="opt" data-cat="0">ציוד כושר שקנינו לו עומד מאובק בפינה</button>
+        <button class="opt" data-cat="1">הוא ניסה אפליקציית ספירת קלוריות ולא הצליח להתמיד</button>
+        <button class="opt" data-cat="2">הוא מנשנש מול הטלוויזיה / מחשב ולא שם לב כמה הוא אוכל</button>
+        <button class="opt" data-cat="3">כשהוא בבית הוא אוכל בסדר — הבעיה כולה היא בחוץ</button>
+      </div>
+    </div>
+    <div class="nav">
+      <button class="btn-back" onclick="goBack(3)">→ חזרה</button>
+      <button class="btn-next" id="next-3" onclick="goNext(3)">הבא ←</button>
+    </div>
+  </div>
+
+  <!-- שאלה 5 -->
+  <div class="q-step" id="step-4">
+    <div class="q-card">
+      <div class="q-label">שאלה 5</div>
+      <div class="q-text">עם איזה משפט את הכי מזדהה?</div>
+      <div class="options">
+        <button class="opt" data-cat="0">"זה לא בשבילי" / "אני לא יכול להתמיד בזה"</button>
+        <button class="opt" data-cat="1">"ניסיתי הכל ושום דבר לא עוזר לי"</button>
+        <button class="opt" data-cat="2">"אני אוכל רק כשאני רעב" — ואז אוכל הכל בבת אחת</button>
+        <button class="opt" data-cat="3">"מה לעשות, כולם אוכלים — אני לא יכול להיות השונה"</button>
+      </div>
+    </div>
+    <div class="nav">
+      <button class="btn-back" onclick="goBack(4)">→ חזרה</button>
+      <button class="btn-next" id="next-4" onclick="goNext(4)">הבא ←</button>
+    </div>
+  </div>
+
+  <!-- שאלה 6 -->
+  <div class="q-step" id="step-5">
+    <div class="q-card">
+      <div class="q-label">שאלה 6</div>
+      <div class="q-text">עם איזה משפט את הכי מזדהה?</div>
+      <div class="options">
+        <button class="opt" data-cat="0">רשמתי אותו לחדר כושר / מאמן אישי — התחיל והפסיק</button>
+        <button class="opt" data-cat="1">לקחתי אותו לתזונאית — קיבלנו דף כללי שלא הצליח ליישם</button>
+        <button class="opt" data-cat="2">ניסינו שעות קבועות לאכילה אבל הוא אוכל מתי שבא לו</button>
+        <button class="opt" data-cat="3">ניסיתי לתת לו אוכל מהבית אבל הוא מתבייש להוציא אותו</button>
+      </div>
+    </div>
+    <div class="nav">
+      <button class="btn-back" onclick="goBack(5)">→ חזרה</button>
+      <button class="btn-next" id="next-5" onclick="goNext(5)">הבא ←</button>
+    </div>
+  </div>
+
+  <!-- שאלה 7 -->
+  <div class="q-step" id="step-6">
+    <div class="q-card">
+      <div class="q-label">שאלה 7</div>
+      <div class="q-text">עם איזה משפט את הכי מזדהה?</div>
+      <div class="options">
+        <button class="opt" data-cat="0">שאני מרגיש שאני צריך להעיר לו בשביל מטרה שלא שלו</button>
+        <button class="opt" data-cat="1">שגם כשהוא התמיד בחדר כושר — הוא לא ראה תוצאות</button>
+        <button class="opt" data-cat="2">שהוא אוכל הרבה בלילות ואין לי שליטה על זה</button>
+        <button class="opt" data-cat="3">שאין לי מושג מה הוא אוכל בחוץ ואני לא יכול לשלוט</button>
+      </div>
+    </div>
+    <div class="nav">
+      <button class="btn-back" onclick="goBack(6)">→ חזרה</button>
+      <button class="btn-next" id="next-6" onclick="goNext(6)">הבא ←</button>
+    </div>
+  </div>
+
+  <!-- טופס פרטים -->
+  <div class="q-step" id="step-7">
+    <div class="form-card">
+      <div class="q-label">כמעט סיימנו!</div>
+      <div class="form-title">אני שולח לך את תוצאות האבחון!</div>
+      <div class="form-sub">תמלאי את הפרטים ותקבלי את הסיבה המדוייקת + המלצה אישית לבן שלך</div>
+      <div class="field">
+        <label for="f-name">איך קוראים לך?</label>
+        <input type="text" id="f-name" placeholder="שם פרטי">
+      </div>
+      <div class="field">
+        <label for="f-phone">מה הטלפון שלך?</label>
+        <input type="tel" id="f-phone" placeholder="05X-XXXXXXX" dir="ltr">
+      </div>
+      <div class="field">
+        <label for="f-age">בן כמה הבן שלך?</label>
+        <input type="number" id="f-age" placeholder="גיל" min="10" max="20">
+      </div>
+      <button class="submit-btn" id="submit-btn" onclick="submitForm()" disabled style="opacity:0.4;cursor:not-allowed">אני רוצה לקבל את האבחון ←</button>
+    </div>
+    <div class="nav" style="margin-top:16px">
+      <button class="btn-back" onclick="goBack(7)">→ חזרה לשאלות</button>
+      <div></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const answers = new Array(7).fill(null);
+const resultPages = [
+  'result-motivation.html',
+  'result-solutions.html',
+  'result-eating.html',
+  'result-outside.html'
+];
+
+function updateProgress(step) {
+  const pct = Math.round((step / 7) * 100);
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('prog-text').textContent =
+    step < 7 ? 'שאלה ' + (step + 1) + ' מתוך 7' : 'השאירי פרטים';
+}
+
+document.querySelectorAll('.opt').forEach(btn => {
+  btn.addEventListener('click', function () {
+    const card = this.closest('.q-card');
+    card.querySelectorAll('.opt').forEach(b => b.classList.remove('selected'));
+    this.classList.add('selected');
+    const stepEl = this.closest('.q-step');
+    const stepIdx = parseInt(stepEl.id.replace('step-', ''));
+    answers[stepIdx] = parseInt(this.dataset.cat);
+    const nextBtn = document.getElementById('next-' + stepIdx);
+    if (nextBtn) nextBtn.classList.add('ready');
+  });
+});
+
+function goNext(currentStep) {
+  if (answers[currentStep] === null) return;
+  document.getElementById('step-' + currentStep).classList.remove('active');
+  const nextStep = currentStep + 1;
+  document.getElementById('step-' + nextStep).classList.add('active');
+  updateProgress(nextStep);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function goBack(currentStep) {
+  document.getElementById('step-' + currentStep).classList.remove('active');
+  document.getElementById('step-' + (currentStep - 1)).classList.add('active');
+  updateProgress(currentStep - 1);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function checkFormReady() {
+  const name = document.getElementById('f-name').value.trim();
+  const phone = document.getElementById('f-phone').value.trim();
+  const age = document.getElementById('f-age').value.trim();
+  const btn = document.getElementById('submit-btn');
+  const ready = name && phone && age;
+  btn.disabled = !ready;
+  btn.style.opacity = ready ? '1' : '0.4';
+  btn.style.cursor = ready ? 'pointer' : 'not-allowed';
+}
+['f-name','f-phone','f-age'].forEach(id => {
+  document.getElementById(id).addEventListener('input', checkFormReady);
+});
+
+function submitForm() {
+  const name = document.getElementById('f-name').value.trim();
+  const phone = document.getElementById('f-phone').value.trim();
+  const age = document.getElementById('f-age').value.trim();
+  if (!name || !phone || !age) {
+    alert('נא למלא את כל השדות');
+    return;
+  }
+  const counts = [0, 0, 0, 0];
+  answers.forEach(a => { if (a !== null) counts[a]++; });
+  const winner = counts.indexOf(Math.max(...counts));
+  const params = new URLSearchParams({ name, phone, age });
+  window.location.href = resultPages[winner] + '?' + params.toString();
+}
+</script>
+</body>
+</html>

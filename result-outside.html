@@ -1,0 +1,116 @@
+﻿<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>קורן צבר — תוצאת האבחון שלך</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #f7f9f8; color: #1a1a1a; direction: rtl; min-height: 100vh; }
+  .top-bar { background: #fff; border-bottom: 1px solid #e8ede9; padding: 14px 20px; text-align: center; font-size: 13px; color: #555; letter-spacing: 0.03em; }
+  .hero { background: linear-gradient(135deg, #2e3d0e 0%, #4a5c1a 100%); color: #fff; text-align: center; padding: 40px 20px 36px; }
+  .hero-tag { display: inline-block; background: rgba(255,255,255,0.2); border-radius: 20px; padding: 5px 16px; font-size: 13px; margin-bottom: 14px; }
+  .hero h1 { font-size: clamp(19px, 4.5vw, 26px); font-weight: 700; line-height: 1.45; max-width: 540px; margin: 0 auto 10px; }
+  .hero-name { font-size: 15px; opacity: 0.88; }
+  .content { max-width: 620px; margin: 0 auto; padding: 32px 20px 60px; }
+  .video-card { background: #fff; border-radius: 16px; box-shadow: 0 2px 16px rgba(0,0,0,0.08); overflow: hidden; margin-bottom: 24px; }
+  .video-wrap { position: relative; width: 100%; padding-top: 56.25%; background: #111; }
+  .video-wrap video, .video-wrap iframe { position: absolute; top: 0; right: 0; width: 100%; height: 100%; border: none; }
+  .cta-section { background: #fff; border-radius: 16px; box-shadow: 0 2px 16px rgba(0,0,0,0.08); padding: 28px; }
+  .cta-title { font-size: 19px; font-weight: 700; color: #1a1a1a; margin-bottom: 6px; text-align: center; }
+  .cta-sub { font-size: 14px; color: #666; text-align: center; margin-bottom: 22px; line-height: 1.6; }
+  .field { margin-bottom: 14px; }
+  .field label { display: block; font-size: 13px; font-weight: 500; color: #444; margin-bottom: 5px; }
+  .field input { width: 100%; padding: 13px 14px; border: 1.5px solid #cdd2b0; border-radius: 10px; font-size: 15px; font-family: inherit; color: #1a1a1a; background: #f7f9f8; transition: border-color 0.15s; direction: rtl; }
+  .field input:focus { outline: none; border-color: #4a5c1a; background: #fff; }
+  .submit-btn { width: 100%; background: #4a5c1a; color: #fff; border: none; border-radius: 12px; padding: 16px; font-size: 17px; font-weight: 700; cursor: pointer; font-family: inherit; margin-top: 6px; transition: background 0.2s; }
+  .submit-btn:hover { background: #2e3d0e; }
+  .privacy { font-size: 11px; color: #aaa; text-align: center; margin-top: 10px; }
+  .thanks { display: none; text-align: center; padding: 20px 0 10px; }
+  .thanks-icon { font-size: 40px; margin-bottom: 12px; }
+  .thanks h2 { font-size: 20px; font-weight: 700; color: #2e3d0e; margin-bottom: 8px; }
+  .thanks p { font-size: 15px; color: #555; line-height: 1.6; }
+  .results-section { margin-top: 24px; }
+  .results-title { font-size: 18px; font-weight: 700; color: #1a1a1a; text-align: center; margin-bottom: 16px; }
+  .results-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .results-grid .result-img:last-child:nth-child(odd) { grid-column: 1 / -1; max-width: 50%; margin: 0 auto; }
+  .result-img { width: 100%; border-radius: 14px; display: block; }
+  @media (max-width: 480px) { .hero { padding: 30px 16px 28px; } .cta-section { padding: 20px 16px; } }
+</style>
+</head>
+<body>
+<div class="top-bar">קורן צבר — ליווי כושר ותזונה לנוער</div>
+<div class="hero">
+  <div class="hero-tag">✓ האבחון שלך מוכן</div>
+  <h1>הבעיה היא לחץ חברתי ואכילה בחוץ — הוא לא יכול להיות "השונה" מהחברים</h1>
+  <div class="hero-name" id="greeting"></div>
+</div>
+<div class="content">
+  <div class="video-card">
+    <div class="video-wrap">
+      <!-- להחליף ב: <iframe src="https://www.youtube.com/embed/VIDEO_ID" allowfullscreen></iframe> -->
+      <!-- או: <video src="video-outside.mp4" controls playsinline></video> -->
+      <iframe src="about:blank" allowfullscreen></iframe>
+    </div>
+  </div>
+  <div class="cta-section">
+    <div id="form-area">
+      <div class="cta-title">תשאירי פרטים לשיחת ייעוץ במתנה</div>
+      <div class="cta-sub">הצוות שלנו ייצור איתך קשר בהקדם!</div>
+      <div class="field"><label for="f-name">איך קוראים לך?</label><input type="text" id="f-name" placeholder="שמך הפרטי"></div>
+      <div class="field"><label for="f-phone">מה הטלפון שלך?</label><input type="tel" id="f-phone" placeholder="05X-XXXXXXX" dir="ltr"></div>
+      <div class="field"><label for="f-age">בן כמה הבן שלך?</label><input type="number" id="f-age" placeholder="גיל" min="10" max="20"></div>
+      <button class="submit-btn" id="submit-btn" onclick="submitForm()" disabled style="opacity:0.4;cursor:not-allowed">אני רוצה לקבל שיחת ייעוץ בחינם!</button>
+    </div>
+    <div class="thanks" id="thanks-area">
+      <div class="thanks-icon">🎉</div>
+      <h2>קיבלנו!</h2>
+      <p>קורן תחזור אליך בהקדם עם המלצה מותאמת אישית לבן שלך.</p>
+    </div>
+  </div>
+
+  <!-- תוצאות מתאמנים -->
+  <div class="results-section">
+    <div class="results-title">תוצאות אמיתיות של בנים שעברו את התהליך</div>
+    <div class="results-grid">
+      <img src="לפני אחרי אדם (2).png" alt="לפני אחרי" class="result-img">
+      <img src="לפני אחרי אורי (2).png" alt="לפני אחרי" class="result-img">
+      <img src="לפני אחרי דניאל (2).png" alt="לפני אחרי" class="result-img">
+      <img src="לפני אחרי רהב (2).png" alt="לפני אחרי" class="result-img">
+      <img src="לפני אחרי שלמה.png" alt="לפני אחרי" class="result-img">
+      <img src="לפני אחרי שמעון (1).png" alt="לפני אחרי" class="result-img">
+    </div>
+  </div>
+</div>
+<script>
+  const params = new URLSearchParams(window.location.search);
+  const name = params.get('name') || '';
+  if (name) { document.getElementById('greeting').textContent = 'שלום ' + name + '!'; document.getElementById('f-name').value = name; }
+  const phone = params.get('phone') || '';
+  if (phone) document.getElementById('f-phone').value = phone;
+  const age = params.get('age') || '';
+  if (age) document.getElementById('f-age').value = age;
+  function checkFormReady() {
+    const n = document.getElementById('f-name').value.trim();
+    const p = document.getElementById('f-phone').value.trim();
+    const a = document.getElementById('f-age').value.trim();
+    const btn = document.getElementById('submit-btn');
+    const ready = n && p && a;
+    btn.disabled = !ready;
+    btn.style.opacity = ready ? '1' : '0.4';
+    btn.style.cursor = ready ? 'pointer' : 'not-allowed';
+  }
+  ['f-name','f-phone','f-age'].forEach(id => {
+    document.getElementById(id).addEventListener('input', checkFormReady);
+  });
+  function submitForm() {
+    const n = document.getElementById('f-name').value.trim();
+    const p = document.getElementById('f-phone').value.trim();
+    const a = document.getElementById('f-age').value.trim();
+    if (!n || !p || !a) { alert('נא למלא את כל השדות'); return; }
+    document.getElementById('form-area').style.display = 'none';
+    document.getElementById('thanks-area').style.display = 'block';
+  }
+</script>
+</body>
+</html>
