@@ -42,7 +42,7 @@
 <div class="top-bar">קורן צבר — ליווי כושר ותזונה לנוער</div>
 <div class="hero">
   <div class="hero-tag">✓ האבחון שלך מוכן</div>
-  <h1>הבעיה היא לא הבן שלך — הפתרונות שניסיתם פשוט לא היו מותאמים לו</h1>
+  <h1>הבעיה- הבן שלך ניסה פתרונות שלא באמת עובדים</h1>
   <div class="hero-name" id="greeting"></div>
 </div>
 <div class="content">
@@ -80,7 +80,24 @@
       <img src="לפני אחרי שלמה.png" alt="לפני אחרי" class="result-img">
       <img src="לפני אחרי שמעון (1).png" alt="לפני אחרי" class="result-img">
     </div>
+  
+  <!-- טופס שני אחרי תמונות -->
+  <div class="cta-section" style="margin-top:24px;">
+    <div id="form2-area">
+      <div class="cta-title">תשאירי פרטים לשיחת ייעוץ במתנה</div>
+      <div class="cta-sub">הצוות שלנו ייצור איתך קשר בהקדם!</div>
+      <div class="field"><label for="f2-name">איך קוראים לך?</label><input type="text" id="f2-name" placeholder="שם פרטי"></div>
+      <div class="field"><label for="f2-phone">מה הטלפון שלך?</label><input type="tel" id="f2-phone" placeholder="05X-XXXXXXX" dir="ltr"></div>
+      <div class="field"><label for="f2-age">בן כמה הבן שלך?</label><input type="number" id="f2-age" placeholder="גיל" min="10" max="20"></div>
+      <button class="submit-btn" id="submit-btn2" onclick="submitForm2()" disabled style="opacity:0.4;cursor:not-allowed">אני רוצה לקבל שיחת ייעוץ בחינם!</button>
+    </div>
+    <div class="thanks" id="thanks2-area">
+      <div class="thanks-icon">🎉</div>
+      <h2>קיבלנו!</h2>
+      <p>קורן תחזור אליך בהקדם עם המלצה מותאמת אישית לבן שלך.</p>
+    </div>
   </div>
+</div>
 </div>
 <script>
   const params = new URLSearchParams(window.location.search);
@@ -110,6 +127,28 @@
     if (!n || !p || !a) { alert('נא למלא את כל השדות'); return; }
     document.getElementById('form-area').style.display = 'none';
     document.getElementById('thanks-area').style.display = 'block';
+  }
+
+  function checkForm2() {
+    const n = document.getElementById('f2-name').value.trim();
+    const p = document.getElementById('f2-phone').value.trim();
+    const a = document.getElementById('f2-age').value.trim();
+    const btn = document.getElementById('submit-btn2');
+    const ready = n && p && a;
+    btn.disabled = !ready;
+    btn.style.opacity = ready ? '1' : '0.4';
+    btn.style.cursor = ready ? 'pointer' : 'not-allowed';
+  }
+  ['f2-name','f2-phone','f2-age'].forEach(id => {
+    document.getElementById(id).addEventListener('input', checkForm2);
+  });
+  function submitForm2() {
+    const n = document.getElementById('f2-name').value.trim();
+    const p = document.getElementById('f2-phone').value.trim();
+    const a = document.getElementById('f2-age').value.trim();
+    if (!n || !p || !a) { alert('נא למלא את כל השדות'); return; }
+    document.getElementById('form2-area').style.display = 'none';
+    document.getElementById('thanks2-area').style.display = 'block';
   }
 </script>
 </body>
