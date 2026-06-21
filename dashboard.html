@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>דשבורד — קורן צבר</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f5; color: #1a1a1a; direction: rtl; min-height: 100vh; }
+
+  #login-screen { display: flex; align-items: center; justify-content: center; min-height: 100vh; background: linear-gradient(135deg, #2e3d0e, #4a5c1a); }
+  .login-card { background: #fff; border-radius: 16px; padding: 40px 32px; width: 320px; text-align: center; }
+  .login-card h2 { font-size: 20px; margin-bottom: 6px; color: #1a1a1a; }
+  .login-card p { font-size: 13px; color: #666; margin-bottom: 24px; }
+  .login-card input { width: 100%; padding: 12px 14px; border: 1.5px solid #cdd2b0; border-radius: 10px; font-size: 15px; font-family: inherit; margin-bottom: 12px; direction: ltr; text-align: center; }
+  .login-card button { width: 100%; background: #4a5c1a; color: #fff; border: none; border-radius: 10px; padding: 13px; font-size: 16px; font-weight: 700; cursor: pointer; font-family: inherit; }
+  .login-card button:hover { background: #2e3d0e; }
+  .login-err { color: #c0392b; font-size: 13px; margin-top: 8px; display: none; }
+
+  #dashboard { display: none; }
+  .top-bar { background: linear-gradient(135deg, #2e3d0e, #4a5c1a); color: #fff; padding: 16px 28px; display: flex; align-items: center; justify-content: space-between; }
+  .top-bar h1 { font-size: 18px; font-weight: 700; }
+  .top-bar .refresh-btn { background: rgba(255,255,255,0.2); border: none; color: #fff; border-radius: 8px; padding: 8px 16px; font-size: 13px; cursor: pointer; font-family: inherit; }
+  .top-bar .refresh-btn:hover { background: rgba(255,255,255,0.3); }
+
+  .main { max-width: 1100px; margin: 0 auto; padding: 28px 20px 60px; }
+
+  .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 28px; }
+  .stat-card { background: #fff; border-radius: 14px; padding: 20px; text-align: center; border: 1px solid #e8ede9; }
+  .stat-card .num { font-size: 36px; font-weight: 700; color: #2e3d0e; }
+  .stat-card .label { font-size: 13px; color: #666; margin-top: 4px; }
+
+  .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 28px; }
+  .chart-card { background: #fff; border-radius: 14px; padding: 22px; border: 1px solid #e8ede9; }
+  .chart-card h3 { font-size: 15px; font-weight: 700; color: #1a1a1a; margin-bottom: 18px; }
+
+  .chart-full { background: #fff; border-radius: 14px; padding: 22px; border: 1px solid #e8ede9; margin-bottom: 28px; }
+  .chart-full h3 { font-size: 15px; font-weight: 700; color: #1a1a1a; margin-bottom: 18px; }
+
+  .leads-section { background: #fff; border-radius: 14px; border: 1px solid #e8ede9; overflow: hidden; }
+  .leads-header { display: flex; align-items: center; justify-content: space-between; padding: 18px 22px; border-bottom: 1px solid #e8ede9; }
+  .leads-header h3 { font-size: 15px; font-weight: 700; }
+  .filter-btns { display: flex; gap: 8px; }
+  .filter-btn { background: #f0f2f5; border: none; border-radius: 7px; padding: 6px 14px; font-size: 13px; cursor: pointer; font-family: inherit; color: #444; }
+  .filter-btn.active { background: #4a5c1a; color: #fff; }
+
+  table { width: 100%; border-collapse: collapse; }
+  th { background: #f7f9f8; padding: 12px 16px; font-size: 12px; font-weight: 600; color: #555; text-align: right; border-bottom: 1px solid #e8ede9; }
+  td { padding: 12px 16px; font-size: 14px; border-bottom: 1px solid #f0f2f5; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #f7f9f8; }
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+  .badge-1 { background: #e5e9d0; color: #2e3d0e; }
+  .badge-2 { background: #d4edda; color: #155724; }
+  .badge-page { background: #e8f4f8; color: #0c5460; }
+  .empty { text-align: center; padding: 40px; color: #aaa; font-size: 14px; }
+
+  @media (max-width: 700px) {
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .charts-row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div id="login-screen">
+  <div class="login-card">
+    <h2>דשבורד קורן צבר</h2>
+    <p>הכנס סיסמה כדי לצפות בנתונים</p>
+    <input type="password" id="pwd-input" placeholder="סיסמה" onkeydown="if(event.key==='Enter')doLogin()">
+    <button onclick="doLogin()">כניסה</button>
+    <div class="login-err" id="login-err">סיסמה שגויה</div>
+  </div>
+</div>
+
+<div id="dashboard">
+  <div class="top-bar">
+    <h1>דשבורד אנליטיקס — קורן צבר</h1>
+    <button class="refresh-btn" onclick="loadAll()">↻ רענן נתונים</button>
+  </div>
+  <div class="main">
+    <div class="stats-grid">
+      <div class="stat-card"><div class="num" id="s-visitors">—</div><div class="label">מבקרים</div></div>
+      <div class="stat-card"><div class="num" id="s-completions">—</div><div class="label">השלימו שאלון</div></div>
+      <div class="stat-card"><div class="num" id="s-leads">—</div><div class="label">לידים כולל</div></div>
+      <div class="stat-card"><div class="num" id="s-conversion">—</div><div class="label">אחוז המרה</div></div>
+    </div>
+
+    <div class="charts-row">
+      <div class="chart-card">
+        <h3>עמודי תוצאה — כמה הגיעו לכל אחד</h3>
+        <canvas id="chart-results" height="220"></canvas>
+      </div>
+      <div class="chart-card">
+        <h3>זמן צפייה בסרטון (שניות ממוצע)</h3>
+        <canvas id="chart-video" height="220"></canvas>
+      </div>
+    </div>
+
+    <div class="chart-full">
+      <h3>פאנל נשירה — באיזה שלב אנשים עזבו</h3>
+      <canvas id="chart-funnel" height="120"></canvas>
+    </div>
+
+    <div class="leads-section">
+      <div class="leads-header">
+        <h3>לידים</h3>
+        <div class="filter-btns">
+          <button class="filter-btn active" onclick="filterLeads('all', this)">הכל</button>
+          <button class="filter-btn" onclick="filterLeads(1, this)">טופס ראשון</button>
+          <button class="filter-btn" onclick="filterLeads(2, this)">טופס שני</button>
+        </div>
+      </div>
+      <div id="leads-table-wrap">
+        <div class="empty">טוען...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://hnyidycwpzayjxnturni.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_nFIbqvHIKFVcF7A29DIzGg_eQqsD881';
+const DASH_PASSWORD = 'koren2024';
+
+const SB_HEADERS = { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY };
+
+function doLogin() {
+  const pwd = document.getElementById('pwd-input').value;
+  if (pwd === DASH_PASSWORD) {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+    loadAll();
+  } else {
+    document.getElementById('login-err').style.display = 'block';
+  }
+}
+
+async function sbGet(table, params) {
+  const url = SUPABASE_URL + '/rest/v1/' + table + '?' + (params || 'select=*&order=created_at.desc');
+  const res = await fetch(url, { headers: SB_HEADERS });
+  return res.json();
+}
+
+let allLeads = [];
+let chartResults, chartVideo, chartFunnel;
+
+async function loadAll() {
+  const [events, leads] = await Promise.all([
+    sbGet('events'),
+    sbGet('leads')
+  ]);
+  allLeads = leads;
+  renderStats(events, leads);
+  renderFunnel(events);
+  renderResults(events);
+  renderVideo(events);
+  renderLeadsTable('all');
+}
+
+function renderStats(events, leads) {
+  const sessions = new Set(events.filter(e => e.event_type === 'page_view' && (e.page === 'index.html' || e.page === '')).map(e => e.session_id));
+  const completions = new Set(events.filter(e => e.event_type === 'result_reached').map(e => e.session_id));
+  const conv = sessions.size > 0 ? Math.round((leads.length / sessions.size) * 100) : 0;
+  document.getElementById('s-visitors').textContent = sessions.size;
+  document.getElementById('s-completions').textContent = completions.size;
+  document.getElementById('s-leads').textContent = leads.length;
+  document.getElementById('s-conversion').textContent = conv + '%';
+}
+
+function renderFunnel(events) {
+  const labels = ['כניסה', 'ש׳1', 'ש׳2', 'ש׳3', 'ש׳4', 'ש׳5', 'ש׳6', 'ש׳7', 'טופס', 'תוצאה'];
+  const counts = [
+    new Set(events.filter(e => e.event_type === 'page_view' && (e.page === 'index.html' || e.page === '')).map(e => e.session_id)).size,
+    ...Array.from({length: 7}, (_, i) => new Set(events.filter(e => e.event_type === 'question_answered' && e.step === i).map(e => e.session_id)).size),
+    new Set(events.filter(e => e.event_type === 'form_view').map(e => e.session_id)).size,
+    new Set(events.filter(e => e.event_type === 'result_reached').map(e => e.session_id)).size
+  ];
+  if (chartFunnel) chartFunnel.destroy();
+  chartFunnel = new Chart(document.getElementById('chart-funnel'), {
+    type: 'bar',
+    data: { labels, datasets: [{ data: counts, backgroundColor: '#4a5c1a', borderRadius: 6 }] },
+    options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } }, responsive: true }
+  });
+}
+
+function renderResults(events) {
+  const pages = { 'result-motivation.html': 'מנסה לבד', 'result-solutions.html': 'פתרונות', 'result-eating.html': 'התאמה', 'result-outside.html': 'רצון וידע' };
+  const counts = {};
+  Object.keys(pages).forEach(k => counts[k] = 0);
+  events.filter(e => e.event_type === 'result_reached').forEach(e => { if (e.page && counts[e.page] != null) counts[e.page]++; });
+  if (chartResults) chartResults.destroy();
+  chartResults = new Chart(document.getElementById('chart-results'), {
+    type: 'doughnut',
+    data: { labels: Object.values(pages), datasets: [{ data: Object.values(counts), backgroundColor: ['#4a5c1a','#6b8c2a','#8fb840','#b5d96e'] }] },
+    options: { plugins: { legend: { position: 'bottom' } }, responsive: true }
+  });
+}
+
+function renderVideo(events) {
+  const pages = { 'result-motivation.html': 'מנסה לבד', 'result-solutions.html': 'פתרונות', 'result-eating.html': 'התאמה', 'result-outside.html': 'רצון וידע' };
+  const sums = {}, counts2 = {};
+  Object.keys(pages).forEach(k => { sums[k] = 0; counts2[k] = 0; });
+  events.filter(e => e.event_type === 'video_watch' && e.data && e.data.seconds_watched).forEach(e => {
+    const pg = e.data.page || e.page;
+    if (sums[pg] != null) { sums[pg] += e.data.seconds_watched; counts2[pg]++; }
+  });
+  const avgs = Object.keys(pages).map(k => counts2[k] > 0 ? Math.round(sums[k] / counts2[k]) : 0);
+  if (chartVideo) chartVideo.destroy();
+  chartVideo = new Chart(document.getElementById('chart-video'), {
+    type: 'bar',
+    data: { labels: Object.values(pages), datasets: [{ data: avgs, backgroundColor: '#6b8c2a', borderRadius: 6, label: 'שניות ממוצע' }] },
+    options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } }, responsive: true }
+  });
+}
+
+function filterLeads(filter, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderLeadsTable(filter);
+}
+
+const PAGE_LABELS = { 'result-motivation.html': 'מנסה לבד', 'result-solutions.html': 'פתרונות', 'result-eating.html': 'התאמה', 'result-outside.html': 'רצון וידע' };
+
+function renderLeadsTable(filter) {
+  const data = filter === 'all' ? allLeads : allLeads.filter(l => l.form_number === filter);
+  const wrap = document.getElementById('leads-table-wrap');
+  if (!data.length) { wrap.innerHTML = '<div class="empty">אין לידים עדיין</div>'; return; }
+  wrap.innerHTML = '<table><thead><tr><th>שם</th><th>טלפון</th><th>גיל הבן</th><th>עמוד תוצאה</th><th>טופס</th><th>תאריך</th></tr></thead><tbody>' +
+    data.map(l => {
+      const d = new Date(l.created_at);
+      const date = d.toLocaleDateString('he-IL') + ' ' + d.toLocaleTimeString('he-IL', {hour:'2-digit',minute:'2-digit'});
+      const pageLabel = PAGE_LABELS[l.result_page] || l.result_page || '—';
+      const badge = l.form_number === 2 ? '<span class="badge badge-2">טופס 2</span>' : '<span class="badge badge-1">טופס 1</span>';
+      return `<tr><td>${l.name||'—'}</td><td dir="ltr">${l.phone||'—'}</td><td>${l.age||'—'}</td><td><span class="badge badge-page">${pageLabel}</span></td><td>${badge}</td><td>${date}</td></tr>`;
+    }).join('') +
+    '</tbody></table>';
+}
+
+document.getElementById('pwd-input').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+</script>
+</body>
+</html>

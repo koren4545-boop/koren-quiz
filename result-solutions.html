@@ -37,7 +37,7 @@
   .result-img { width: 100%; border-radius: 14px; display: block; }
   @media (max-width: 480px) { .hero { padding: 30px 16px 28px; } .cta-section { padding: 20px 16px; } }
 </style>
-</head>
+<script src="tracker.js"></script></head>
 <body>
 <div class="top-bar">קורן צבר — ליווי כושר ותזונה לנוער</div>
 <div class="hero">
@@ -101,6 +101,7 @@
 </div>
 </div>
 <script>
+  trackEvent('result_reached', {page: 'result-solutions.html'});
   const params = new URLSearchParams(window.location.search);
   const name = params.get('name') || '';
   if (name) { document.getElementById('f-name').value = name; }
@@ -126,6 +127,7 @@
     const p = document.getElementById('f-phone').value.trim();
     const a = document.getElementById('f-age').value.trim();
     if (!n || !p || !a) { alert('נא למלא את כל השדות'); return; }
+    trackLead(n, p, a, 'result-solutions.html', 1);
     document.getElementById('form-area').style.display = 'none';
     document.getElementById('thanks-area').style.display = 'block';
   }
@@ -148,6 +150,7 @@
     const p = document.getElementById('f2-phone').value.trim();
     const a = document.getElementById('f2-age').value.trim();
     if (!n || !p || !a) { alert('נא למלא את כל השדות'); return; }
+    trackLead(n, p, a, 'result-solutions.html', 2);
     document.getElementById('form2-area').style.display = 'none';
     document.getElementById('thanks2-area').style.display = 'block';
   }
