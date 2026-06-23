@@ -286,7 +286,7 @@ function buildLeadRows() {
     if (Number(l.form_number) === 1) { byPhone[key].form1 = true; byPhone[key].name = l.name; byPhone[key].age = l.age; byPhone[key].result_page = l.result_page; }
     if (Number(l.form_number) === 2) byPhone[key].form2 = true;
   });
-  return Object.values(byPhone).filter(r => !isDeleted(r.key)).sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+  return Object.values(byPhone).filter(r => !isDeleted(r.key, r.created_at)).sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 }
 
 function renderKanban() {
@@ -360,15 +360,16 @@ function changeStatus(key, newStatus) {
 
 function deleteLead(key) {
   if (!confirm('למחוק את הליד הזה?')) return;
-  const deleted = JSON.parse(localStorage.getItem('ks_deleted') || '[]');
-  deleted.push(key);
-  localStorage.setItem('ks_deleted', JSON.stringify(deleted));
+  const deleted = JSON.parse(localStorage.getItem('ks_deleted2') || '{}');
+  deleted[key] = new Date().toISOString();
+  localStorage.setItem('ks_deleted2', JSON.stringify(deleted));
   renderKanban();
 }
 
-function isDeleted(key) {
-  const deleted = JSON.parse(localStorage.getItem('ks_deleted') || '[]');
-  return deleted.includes(key);
+function isDeleted(key, latestCreatedAt) {
+  const deleted = JSON.parse(localStorage.getItem('ks_deleted2') || '{}');
+  if (!deleted[key]) return false;
+  return new Date(latestCreatedAt) < new Date(deleted[key]);
 }
 
 /* ── STATS TAB ── */
