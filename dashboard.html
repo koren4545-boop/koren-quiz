@@ -7,7 +7,7 @@
 <title>דשבורד — קורן צבר</title>
 <script>
 (function(){
-  var V='6';
+  var V='7';
   var u=new URL(location.href);
   if(u.searchParams.get('v')!==V){u.searchParams.set('v',V);location.replace(u.toString());}
 })();
@@ -277,14 +277,10 @@ function setStatus(key, status) {
 }
 
 function buildLeadRows() {
-  const byPhone = {};
-  allLeads.forEach(l => {
-    const key = leadKey(l);
-    if (!byPhone[key]) byPhone[key] = { key, name: l.name, phone: l.phone, age: l.age, result_page: l.result_page, created_at: l.created_at, form1: false, form2: false };
-    if (Number(l.form_number) === 1) { byPhone[key].form1 = true; byPhone[key].name = l.name; byPhone[key].age = l.age; byPhone[key].result_page = l.result_page; }
-    if (Number(l.form_number) === 2) byPhone[key].form2 = true;
-  });
-  return Object.values(byPhone).filter(r => !isDeleted(r.key, r.created_at)).sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+  return allLeads
+    .map(l => ({ key: l.id, id: l.id, name: l.name, phone: l.phone, age: l.age, result_page: l.result_page, created_at: l.created_at, form_number: Number(l.form_number) }))
+    .filter(r => !isDeleted(r.key, r.created_at))
+    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 }
 
 function renderKanban() {
@@ -319,9 +315,8 @@ function renderKanban() {
                 const d = new Date(r.created_at);
                 const date = d.toLocaleDateString('he-IL') + ' ' + d.toLocaleTimeString('he-IL',{hour:'2-digit',minute:'2-digit'});
                 const pageLabel = PAGE_LABELS[r.result_page] || '—';
-                const formBadge = r.form1 && r.form2
-                  ? '<span class="badge badge-both">מתעניין בשבוע ניסיון</span>'
-                  : r.form2 ? '<span class="badge badge-form2">מתעניין בשבוע ניסיון</span>'
+                const formBadge = r.form_number === 2
+                  ? '<span class="badge badge-form2">מתעניין בשבוע ניסיון</span>'
                   : '<span class="badge badge-form1">סיים שאלון</span>';
                 const ek = r.key.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
                 const opts = STATUSES.map(st => `<option value="${st.id}"${st.id===s.id?' selected':''}>${st.label}</option>`).join('');
