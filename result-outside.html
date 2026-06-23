@@ -121,6 +121,7 @@
   ['f-name','f-phone','f-age'].forEach(id => {
     document.getElementById(id).addEventListener('input', checkFormReady);
   });
+  checkFormReady();
   function submitForm() {
     const n = document.getElementById('f-name').value.trim();
     const p = document.getElementById('f-phone').value.trim();
