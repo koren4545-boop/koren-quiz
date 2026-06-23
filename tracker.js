@@ -55,3 +55,19 @@ trackEvent('page_view');
 
 // Track current step (updated by quiz JS)
 window._currentStep = 0;
+
+// Track time on result pages via heartbeat every 30s
+(function() {
+  const page = location.pathname.split('/').pop();
+  const isResultPage = page && page.startsWith('result-');
+  if (!isResultPage) return;
+  const startTime = Date.now();
+  setInterval(function() {
+    const elapsed = Math.round((Date.now() - startTime) / 1000);
+    trackEvent('page_time', { seconds_on_page: elapsed });
+  }, 30000);
+  window.addEventListener('beforeunload', function() {
+    const elapsed = Math.round((Date.now() - startTime) / 1000);
+    if (elapsed > 2) trackEvent('page_time', { seconds_on_page: elapsed });
+  });
+})();

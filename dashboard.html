@@ -9,56 +9,86 @@
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f5; color: #1a1a1a; direction: rtl; min-height: 100vh; }
 
+  /* Login */
   #login-screen { display: flex; align-items: center; justify-content: center; min-height: 100vh; background: linear-gradient(135deg, #2e3d0e, #4a5c1a); }
   .login-card { background: #fff; border-radius: 16px; padding: 40px 32px; width: 320px; text-align: center; }
-  .login-card h2 { font-size: 20px; margin-bottom: 6px; color: #1a1a1a; }
+  .login-card h2 { font-size: 20px; margin-bottom: 6px; }
   .login-card p { font-size: 13px; color: #666; margin-bottom: 24px; }
   .login-card input { width: 100%; padding: 12px 14px; border: 1.5px solid #cdd2b0; border-radius: 10px; font-size: 15px; font-family: inherit; margin-bottom: 12px; direction: ltr; text-align: center; }
   .login-card button { width: 100%; background: #4a5c1a; color: #fff; border: none; border-radius: 10px; padding: 13px; font-size: 16px; font-weight: 700; cursor: pointer; font-family: inherit; }
   .login-card button:hover { background: #2e3d0e; }
   .login-err { color: #c0392b; font-size: 13px; margin-top: 8px; display: none; }
 
+  /* Dashboard shell */
   #dashboard { display: none; }
-  .top-bar { background: linear-gradient(135deg, #2e3d0e, #4a5c1a); color: #fff; padding: 16px 28px; display: flex; align-items: center; justify-content: space-between; }
-  .top-bar h1 { font-size: 18px; font-weight: 700; }
-  .top-bar .refresh-btn { background: rgba(255,255,255,0.2); border: none; color: #fff; border-radius: 8px; padding: 8px 16px; font-size: 13px; cursor: pointer; font-family: inherit; }
-  .top-bar .refresh-btn:hover { background: rgba(255,255,255,0.3); }
+  .top-bar { background: linear-gradient(135deg, #2e3d0e, #4a5c1a); color: #fff; padding: 0 28px; display: flex; align-items: stretch; justify-content: space-between; gap: 0; }
+  .top-bar-title { font-size: 17px; font-weight: 700; display: flex; align-items: center; }
+  .top-bar-actions { display: flex; align-items: center; gap: 10px; }
+  .refresh-btn { background: rgba(255,255,255,0.2); border: none; color: #fff; border-radius: 8px; padding: 8px 16px; font-size: 13px; cursor: pointer; font-family: inherit; }
+  .refresh-btn:hover { background: rgba(255,255,255,0.3); }
 
-  .main { max-width: 1100px; margin: 0 auto; padding: 28px 20px 60px; }
+  /* Tabs */
+  .tabs { display: flex; gap: 0; }
+  .tab { padding: 18px 26px; font-size: 14px; font-weight: 600; color: rgba(255,255,255,0.7); cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.15s; white-space: nowrap; }
+  .tab:hover { color: #fff; background: rgba(255,255,255,0.08); }
+  .tab.active { color: #fff; border-bottom-color: #b5d96e; }
 
-  .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 28px; }
-  .stat-card { background: #fff; border-radius: 14px; padding: 20px; text-align: center; border: 1px solid #e8ede9; }
-  .stat-card .num { font-size: 36px; font-weight: 700; color: #2e3d0e; }
-  .stat-card .label { font-size: 13px; color: #666; margin-top: 4px; }
+  /* Tab panels */
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+  .main { max-width: 1200px; margin: 0 auto; padding: 28px 20px 60px; }
 
-  .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 28px; }
-  .chart-card { background: #fff; border-radius: 14px; padding: 22px; border: 1px solid #e8ede9; }
-  .chart-card h3 { font-size: 15px; font-weight: 700; color: #1a1a1a; margin-bottom: 18px; }
-
-  .chart-full { background: #fff; border-radius: 14px; padding: 22px; border: 1px solid #e8ede9; margin-bottom: 28px; }
-  .chart-full h3 { font-size: 15px; font-weight: 700; color: #1a1a1a; margin-bottom: 18px; }
-
+  /* Leads tab */
   .leads-section { background: #fff; border-radius: 14px; border: 1px solid #e8ede9; overflow: hidden; }
-  .leads-header { display: flex; align-items: center; justify-content: space-between; padding: 18px 22px; border-bottom: 1px solid #e8ede9; }
-  .leads-header h3 { font-size: 15px; font-weight: 700; }
+  .leads-header { display: flex; align-items: center; justify-content: space-between; padding: 18px 22px; border-bottom: 1px solid #e8ede9; flex-wrap: wrap; gap: 12px; }
+  .leads-header h3 { font-size: 16px; font-weight: 700; }
+  .leads-count { font-size: 13px; color: #666; }
   .filter-btns { display: flex; gap: 8px; }
   .filter-btn { background: #f0f2f5; border: none; border-radius: 7px; padding: 6px 14px; font-size: 13px; cursor: pointer; font-family: inherit; color: #444; }
   .filter-btn.active { background: #4a5c1a; color: #fff; }
 
   table { width: 100%; border-collapse: collapse; }
-  th { background: #f7f9f8; padding: 12px 16px; font-size: 12px; font-weight: 600; color: #555; text-align: right; border-bottom: 1px solid #e8ede9; }
-  td { padding: 12px 16px; font-size: 14px; border-bottom: 1px solid #f0f2f5; }
+  th { background: #f7f9f8; padding: 12px 16px; font-size: 12px; font-weight: 600; color: #555; text-align: right; border-bottom: 1px solid #e8ede9; white-space: nowrap; }
+  td { padding: 12px 16px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vertical-align: middle; }
   tr:last-child td { border-bottom: none; }
   tr:hover td { background: #f7f9f8; }
-  .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
-  .badge-1 { background: #e5e9d0; color: #2e3d0e; }
-  .badge-2 { background: #d4edda; color: #155724; }
-  .badge-page { background: #e8f4f8; color: #0c5460; }
-  .empty { text-align: center; padding: 40px; color: #aaa; font-size: 14px; }
 
-  @media (max-width: 700px) {
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+  .badge-form1 { background: #e5e9d0; color: #2e3d0e; }
+  .badge-form2 { background: #d4edda; color: #155724; }
+  .badge-both { background: #fff3cd; color: #856404; }
+  .badge-page { background: #e8f4f8; color: #0c5460; font-size: 11px; }
+  .badge-none { background: #f0f0f0; color: #888; }
+
+  .empty { text-align: center; padding: 50px; color: #aaa; font-size: 14px; }
+
+  /* Stats tab */
+  .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 28px; }
+  .stat-card { background: #fff; border-radius: 14px; padding: 20px; text-align: center; border: 1px solid #e8ede9; }
+  .stat-card .num { font-size: 36px; font-weight: 700; color: #2e3d0e; line-height: 1.1; }
+  .stat-card .label { font-size: 12px; color: #666; margin-top: 6px; line-height: 1.4; }
+
+  .section-card { background: #fff; border-radius: 14px; padding: 22px; border: 1px solid #e8ede9; margin-bottom: 22px; }
+  .section-card h3 { font-size: 15px; font-weight: 700; margin-bottom: 18px; color: #1a1a1a; }
+
+  .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 22px; }
+
+  /* Video stats table */
+  .video-stats-table { width: 100%; border-collapse: collapse; }
+  .video-stats-table th { background: #f7f9f8; padding: 10px 14px; font-size: 12px; font-weight: 600; color: #555; text-align: right; border-bottom: 1px solid #e8ede9; }
+  .video-stats-table td { padding: 12px 14px; font-size: 14px; border-bottom: 1px solid #f5f5f5; }
+  .video-stats-table tr:last-child td { border-bottom: none; }
+  .video-stats-table tr:hover td { background: #f9fafb; }
+
+  /* Funnel */
+  .funnel-wrap { position: relative; }
+  .drop-label { font-size: 11px; color: #c0392b; }
+
+  @media (max-width: 750px) {
     .stats-grid { grid-template-columns: repeat(2, 1fr); }
     .charts-row { grid-template-columns: 1fr; }
+    .top-bar { flex-wrap: wrap; padding: 0 16px; }
+    .tabs { overflow-x: auto; }
   }
 </style>
 </head>
@@ -68,7 +98,7 @@
   <div class="login-card">
     <h2>דשבורד קורן צבר</h2>
     <p>הכנס סיסמה כדי לצפות בנתונים</p>
-    <input type="password" id="pwd-input" placeholder="סיסמה" onkeydown="if(event.key==='Enter')doLogin()">
+    <input type="password" id="pwd-input" placeholder="סיסמה">
     <button onclick="doLogin()">כניסה</button>
     <div class="login-err" id="login-err">סיסמה שגויה</div>
   </div>
@@ -76,45 +106,86 @@
 
 <div id="dashboard">
   <div class="top-bar">
-    <h1>דשבורד אנליטיקס — קורן צבר</h1>
-    <button class="refresh-btn" onclick="loadAll()">↻ רענן נתונים</button>
+    <div class="top-bar-title">קורן צבר — דשבורד</div>
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('leads', this)">לידים</div>
+      <div class="tab" onclick="switchTab('stats', this)">סטטיסטיקות</div>
+    </div>
+    <div class="top-bar-actions">
+      <button class="refresh-btn" onclick="loadAll()">↻ רענן</button>
+    </div>
   </div>
-  <div class="main">
-    <div class="stats-grid">
-      <div class="stat-card"><div class="num" id="s-visitors">—</div><div class="label">מבקרים</div></div>
-      <div class="stat-card"><div class="num" id="s-completions">—</div><div class="label">השלימו שאלון</div></div>
-      <div class="stat-card"><div class="num" id="s-leads">—</div><div class="label">לידים כולל</div></div>
-      <div class="stat-card"><div class="num" id="s-conversion">—</div><div class="label">אחוז המרה</div></div>
-    </div>
 
-    <div class="charts-row">
-      <div class="chart-card">
-        <h3>עמודי תוצאה — כמה הגיעו לכל אחד</h3>
-        <canvas id="chart-results" height="220"></canvas>
+  <!-- TAB: Leads -->
+  <div class="tab-panel active" id="panel-leads">
+    <div class="main">
+      <div class="leads-section">
+        <div class="leads-header">
+          <div>
+            <h3>לידים</h3>
+            <div class="leads-count" id="leads-count"></div>
+          </div>
+          <div class="filter-btns">
+            <button class="filter-btn active" onclick="filterLeads('all', this)">הכל</button>
+            <button class="filter-btn" onclick="filterLeads('form1only', this)">טופס 1 בלבד</button>
+            <button class="filter-btn" onclick="filterLeads('form2', this)">השאירו גם טופס 2</button>
+          </div>
+        </div>
+        <div id="leads-table-wrap"><div class="empty">טוען...</div></div>
       </div>
-      <div class="chart-card">
-        <h3>זמן צפייה בסרטון (שניות ממוצע)</h3>
-        <canvas id="chart-video" height="220"></canvas>
+    </div>
+  </div>
+
+  <!-- TAB: Stats -->
+  <div class="tab-panel" id="panel-stats">
+    <div class="main">
+
+      <!-- KPI cards -->
+      <div class="stats-grid">
+        <div class="stat-card"><div class="num" id="s-visitors">—</div><div class="label">נכנסו לשאלון</div></div>
+        <div class="stat-card"><div class="num" id="s-completions">—</div><div class="label">סיימו את השאלון</div></div>
+        <div class="stat-card"><div class="num" id="s-completed-no-lead">—</div><div class="label">סיימו ולא השאירו פרטים</div></div>
+        <div class="stat-card"><div class="num" id="s-leads">—</div><div class="label">השאירו פרטים (לידים)</div></div>
       </div>
-    </div>
 
-    <div class="chart-full">
-      <h3>פאנל נשירה — באיזה שלב אנשים עזבו</h3>
-      <canvas id="chart-funnel" height="120"></canvas>
-    </div>
+      <!-- Funnel -->
+      <div class="section-card">
+        <h3>נשירה לפי שאלה — כמה המשיכו בכל שלב</h3>
+        <canvas id="chart-funnel" height="110"></canvas>
+      </div>
 
-    <div class="leads-section">
-      <div class="leads-header">
-        <h3>לידים</h3>
-        <div class="filter-btns">
-          <button class="filter-btn active" onclick="filterLeads('all', this)">הכל</button>
-          <button class="filter-btn" onclick="filterLeads(1, this)">טופס ראשון</button>
-          <button class="filter-btn" onclick="filterLeads(2, this)">טופס שני</button>
+      <div class="charts-row">
+        <!-- Results distribution -->
+        <div class="section-card" style="margin-bottom:0">
+          <h3>כמה הגיעו לכל סרטון</h3>
+          <canvas id="chart-results" height="220"></canvas>
+        </div>
+        <!-- Form 2 conversion -->
+        <div class="section-card" style="margin-bottom:0">
+          <h3>טופס ראשון מול שני</h3>
+          <canvas id="chart-forms" height="220"></canvas>
         </div>
       </div>
-      <div id="leads-table-wrap">
-        <div class="empty">טוען...</div>
+      <div style="margin-bottom:22px"></div>
+
+      <!-- Video + page time stats -->
+      <div class="section-card">
+        <h3>נתוני סרטונים — זמן צפייה, זמן בדף, לידים</h3>
+        <table class="video-stats-table">
+          <thead>
+            <tr>
+              <th>סרטון</th>
+              <th>הגיעו לדף</th>
+              <th>זמן ממוצע בדף (שניות)</th>
+              <th>זמן צפייה ממוצע (שניות)</th>
+              <th>השאירו פרטים (טופס 1)</th>
+              <th>השאירו פרטים (טופס 2)</th>
+            </tr>
+          </thead>
+          <tbody id="video-stats-body"></tbody>
+        </table>
       </div>
+
     </div>
   </div>
 </div>
@@ -123,8 +194,15 @@
 const SUPABASE_URL = 'https://hnyidycwpzayjxnturni.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_nFIbqvHIKFVcF7A29DIzGg_eQqsD881';
 const DASH_PASSWORD = 'koren2024';
-
 const SB_HEADERS = { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY };
+
+const PAGE_LABELS = {
+  'result-motivation.html': 'את מנסה לבד',
+  'result-solutions.html': 'פתרונות שלא עובדים',
+  'result-eating.html': 'פתרונות שלא מותאמים',
+  'result-outside.html': 'יש לו רצון- חסרה הדרך'
+};
+const PAGE_KEYS = Object.keys(PAGE_LABELS);
 
 function doLogin() {
   const pwd = document.getElementById('pwd-input').value;
@@ -136,84 +214,38 @@ function doLogin() {
     document.getElementById('login-err').style.display = 'block';
   }
 }
+document.getElementById('pwd-input').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+
+function switchTab(name, el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('panel-' + name).classList.add('active');
+}
 
 async function sbGet(table, params) {
-  const url = SUPABASE_URL + '/rest/v1/' + table + '?' + (params || 'select=*&order=created_at.desc');
+  const url = SUPABASE_URL + '/rest/v1/' + table + '?' + (params || 'select=*&order=created_at.desc&limit=5000');
   const res = await fetch(url, { headers: SB_HEADERS });
   return res.json();
 }
 
-let allLeads = [];
-let chartResults, chartVideo, chartFunnel;
+let allLeads = [], allEvents = [];
+let chartFunnel, chartResults, chartForms;
 
 async function loadAll() {
-  const [events, leads] = await Promise.all([
-    sbGet('events'),
-    sbGet('leads')
-  ]);
-  allLeads = leads;
-  renderStats(events, leads);
-  renderFunnel(events);
-  renderResults(events);
-  renderVideo(events);
+  document.getElementById('leads-table-wrap').innerHTML = '<div class="empty">טוען...</div>';
+  const [events, leads] = await Promise.all([sbGet('events'), sbGet('leads')]);
+  allLeads = Array.isArray(leads) ? leads : [];
+  allEvents = Array.isArray(events) ? events : [];
   renderLeadsTable('all');
+  renderStats();
+  renderFunnel();
+  renderResultsChart();
+  renderFormsChart();
+  renderVideoStats();
 }
 
-function renderStats(events, leads) {
-  const sessions = new Set(events.filter(e => e.event_type === 'page_view' && (e.page === 'index.html' || e.page === '')).map(e => e.session_id));
-  const completions = new Set(events.filter(e => e.event_type === 'result_reached').map(e => e.session_id));
-  const conv = sessions.size > 0 ? Math.round((leads.length / sessions.size) * 100) : 0;
-  document.getElementById('s-visitors').textContent = sessions.size;
-  document.getElementById('s-completions').textContent = completions.size;
-  document.getElementById('s-leads').textContent = leads.length;
-  document.getElementById('s-conversion').textContent = conv + '%';
-}
-
-function renderFunnel(events) {
-  const labels = ['כניסה', 'ש׳1', 'ש׳2', 'ש׳3', 'ש׳4', 'ש׳5', 'ש׳6', 'ש׳7', 'טופס', 'תוצאה'];
-  const counts = [
-    new Set(events.filter(e => e.event_type === 'page_view' && (e.page === 'index.html' || e.page === '')).map(e => e.session_id)).size,
-    ...Array.from({length: 7}, (_, i) => new Set(events.filter(e => e.event_type === 'question_answered' && e.step === i).map(e => e.session_id)).size),
-    new Set(events.filter(e => e.event_type === 'form_view').map(e => e.session_id)).size,
-    new Set(events.filter(e => e.event_type === 'result_reached').map(e => e.session_id)).size
-  ];
-  if (chartFunnel) chartFunnel.destroy();
-  chartFunnel = new Chart(document.getElementById('chart-funnel'), {
-    type: 'bar',
-    data: { labels, datasets: [{ data: counts, backgroundColor: '#4a5c1a', borderRadius: 6 }] },
-    options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } }, responsive: true }
-  });
-}
-
-function renderResults(events) {
-  const pages = { 'result-motivation.html': 'מנסה לבד', 'result-solutions.html': 'פתרונות', 'result-eating.html': 'התאמה', 'result-outside.html': 'רצון וידע' };
-  const counts = {};
-  Object.keys(pages).forEach(k => counts[k] = 0);
-  events.filter(e => e.event_type === 'result_reached').forEach(e => { if (e.page && counts[e.page] != null) counts[e.page]++; });
-  if (chartResults) chartResults.destroy();
-  chartResults = new Chart(document.getElementById('chart-results'), {
-    type: 'doughnut',
-    data: { labels: Object.values(pages), datasets: [{ data: Object.values(counts), backgroundColor: ['#4a5c1a','#6b8c2a','#8fb840','#b5d96e'] }] },
-    options: { plugins: { legend: { position: 'bottom' } }, responsive: true }
-  });
-}
-
-function renderVideo(events) {
-  const pages = { 'result-motivation.html': 'מנסה לבד', 'result-solutions.html': 'פתרונות', 'result-eating.html': 'התאמה', 'result-outside.html': 'רצון וידע' };
-  const sums = {}, counts2 = {};
-  Object.keys(pages).forEach(k => { sums[k] = 0; counts2[k] = 0; });
-  events.filter(e => e.event_type === 'video_watch' && e.data && e.data.seconds_watched).forEach(e => {
-    const pg = e.data.page || e.page;
-    if (sums[pg] != null) { sums[pg] += e.data.seconds_watched; counts2[pg]++; }
-  });
-  const avgs = Object.keys(pages).map(k => counts2[k] > 0 ? Math.round(sums[k] / counts2[k]) : 0);
-  if (chartVideo) chartVideo.destroy();
-  chartVideo = new Chart(document.getElementById('chart-video'), {
-    type: 'bar',
-    data: { labels: Object.values(pages), datasets: [{ data: avgs, backgroundColor: '#6b8c2a', borderRadius: 6, label: 'שניות ממוצע' }] },
-    options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } }, responsive: true }
-  });
-}
+/* ── LEADS TAB ── */
 
 function filterLeads(filter, btn) {
   document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -221,24 +253,182 @@ function filterLeads(filter, btn) {
   renderLeadsTable(filter);
 }
 
-const PAGE_LABELS = { 'result-motivation.html': 'מנסה לבד', 'result-solutions.html': 'פתרונות', 'result-eating.html': 'התאמה', 'result-outside.html': 'רצון וידע' };
-
 function renderLeadsTable(filter) {
-  const data = filter === 'all' ? allLeads : allLeads.filter(l => l.form_number === filter);
+  // Build per-phone map: phone → { lead data, forms submitted }
+  const byPhone = {};
+  allLeads.forEach(l => {
+    const key = (l.phone || '').replace(/\D/g, '') || l.name + '|' + (l.age||'');
+    if (!byPhone[key]) byPhone[key] = { ...l, form1: false, form2: false };
+    if (l.form_number === 1) { byPhone[key].form1 = true; byPhone[key] = { ...byPhone[key], ...l, form1: true }; }
+    if (l.form_number === 2) byPhone[key].form2 = true;
+  });
+
+  let rows = Object.values(byPhone);
+  if (filter === 'form1only') rows = rows.filter(r => r.form1 && !r.form2);
+  if (filter === 'form2') rows = rows.filter(r => r.form2);
+
+  // Sort newest first
+  rows.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+  document.getElementById('leads-count').textContent = rows.length + ' לידים';
+
   const wrap = document.getElementById('leads-table-wrap');
-  if (!data.length) { wrap.innerHTML = '<div class="empty">אין לידים עדיין</div>'; return; }
-  wrap.innerHTML = '<table><thead><tr><th>שם</th><th>טלפון</th><th>גיל הבן</th><th>עמוד תוצאה</th><th>טופס</th><th>תאריך</th></tr></thead><tbody>' +
-    data.map(l => {
-      const d = new Date(l.created_at);
+  if (!rows.length) { wrap.innerHTML = '<div class="empty">אין לידים</div>'; return; }
+
+  wrap.innerHTML = '<table><thead><tr>' +
+    '<th>שם</th><th>טלפון</th><th>גיל הבן</th><th>סרטון שראה</th><th>השאיר פרטים</th><th>תאריך</th>' +
+    '</tr></thead><tbody>' +
+    rows.map(r => {
+      const d = new Date(r.created_at);
       const date = d.toLocaleDateString('he-IL') + ' ' + d.toLocaleTimeString('he-IL', {hour:'2-digit',minute:'2-digit'});
-      const pageLabel = PAGE_LABELS[l.result_page] || l.result_page || '—';
-      const badge = l.form_number === 2 ? '<span class="badge badge-2">טופס 2</span>' : '<span class="badge badge-1">טופס 1</span>';
-      return `<tr><td>${l.name||'—'}</td><td dir="ltr">${l.phone||'—'}</td><td>${l.age||'—'}</td><td><span class="badge badge-page">${pageLabel}</span></td><td>${badge}</td><td>${date}</td></tr>`;
-    }).join('') +
-    '</tbody></table>';
+      const pageLabel = PAGE_LABELS[r.result_page] || r.result_page || '—';
+      let formBadge;
+      if (r.form1 && r.form2) formBadge = '<span class="badge badge-both">טופס 1 + 2</span>';
+      else if (r.form2) formBadge = '<span class="badge badge-form2">טופס 2</span>';
+      else formBadge = '<span class="badge badge-form1">טופס 1</span>';
+      return `<tr>
+        <td><strong>${r.name||'—'}</strong></td>
+        <td dir="ltr">${r.phone||'—'}</td>
+        <td>${r.age||'—'}</td>
+        <td><span class="badge badge-page">${pageLabel}</span></td>
+        <td>${formBadge}</td>
+        <td style="font-size:12px;color:#666">${date}</td>
+      </tr>`;
+    }).join('') + '</tbody></table>';
 }
 
-document.getElementById('pwd-input').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+/* ── STATS TAB ── */
+
+function renderStats() {
+  const visitors = new Set(allEvents.filter(e => e.event_type === 'page_view' && (e.page === 'index.html' || e.page === '' || e.page === '/')).map(e => e.session_id)).size;
+  const completionSessions = new Set(allEvents.filter(e => e.event_type === 'result_reached').map(e => e.session_id));
+  const leadSessions = new Set(allLeads.map(l => l.session_id));
+  const completedNoLead = [...completionSessions].filter(s => !leadSessions.has(s)).length;
+
+  document.getElementById('s-visitors').textContent = visitors;
+  document.getElementById('s-completions').textContent = completionSessions.size;
+  document.getElementById('s-completed-no-lead').textContent = completedNoLead;
+  document.getElementById('s-leads').textContent = allLeads.length;
+}
+
+function renderFunnel() {
+  const labels = ['נכנסו', 'ש׳1', 'ש׳2', 'ש׳3', 'ש׳4', 'ש׳5', 'ש׳6', 'ש׳7', 'טופס', 'סרטון'];
+  const counts = [
+    new Set(allEvents.filter(e => e.event_type === 'page_view' && (e.page === 'index.html' || e.page === '' || e.page === '/')).map(e => e.session_id)).size,
+    ...Array.from({length: 7}, (_, i) =>
+      new Set(allEvents.filter(e => e.event_type === 'question_answered' && e.step === i).map(e => e.session_id)).size
+    ),
+    new Set(allEvents.filter(e => e.event_type === 'form_view').map(e => e.session_id)).size,
+    new Set(allEvents.filter(e => e.event_type === 'result_reached').map(e => e.session_id)).size
+  ];
+  if (chartFunnel) chartFunnel.destroy();
+  chartFunnel = new Chart(document.getElementById('chart-funnel'), {
+    type: 'bar',
+    data: { labels, datasets: [{ data: counts, backgroundColor: counts.map((_, i) => i === 0 ? '#2e3d0e' : '#4a5c1a'), borderRadius: 6 }] },
+    options: {
+      plugins: { legend: { display: false }, tooltip: {
+        callbacks: {
+          afterLabel: (ctx) => {
+            const prev = counts[ctx.dataIndex - 1];
+            if (prev && prev > 0) {
+              const drop = Math.round((1 - ctx.raw / prev) * 100);
+              return drop > 0 ? `נשירה: ${drop}%` : '';
+            }
+            return '';
+          }
+        }
+      }},
+      scales: { y: { beginAtZero: true } },
+      responsive: true
+    }
+  });
+}
+
+function renderResultsChart() {
+  const counts = PAGE_KEYS.map(k =>
+    new Set(allEvents.filter(e => e.event_type === 'result_reached' && e.page === k).map(e => e.session_id)).size
+  );
+  if (chartResults) chartResults.destroy();
+  chartResults = new Chart(document.getElementById('chart-results'), {
+    type: 'doughnut',
+    data: {
+      labels: PAGE_KEYS.map(k => PAGE_LABELS[k]),
+      datasets: [{ data: counts, backgroundColor: ['#2e3d0e','#4a5c1a','#6b8c2a','#b5d96e'] }]
+    },
+    options: { plugins: { legend: { position: 'bottom', labels: { font: { size: 11 } } } }, responsive: true }
+  });
+}
+
+function renderFormsChart() {
+  // Per unique phone: how many submitted form1 only, form2 only, both
+  const byPhone = {};
+  allLeads.forEach(l => {
+    const key = (l.phone || '').replace(/\D/g, '') || l.name;
+    if (!byPhone[key]) byPhone[key] = { form1: false, form2: false };
+    if (l.form_number === 1) byPhone[key].form1 = true;
+    if (l.form_number === 2) byPhone[key].form2 = true;
+  });
+  const rows = Object.values(byPhone);
+  const form1only = rows.filter(r => r.form1 && !r.form2).length;
+  const form2only = rows.filter(r => r.form2 && !r.form1).length;
+  const both = rows.filter(r => r.form1 && r.form2).length;
+  if (chartForms) chartForms.destroy();
+  chartForms = new Chart(document.getElementById('chart-forms'), {
+    type: 'doughnut',
+    data: {
+      labels: ['טופס 1 בלבד', 'טופס 2 בלבד', 'שני הטפסים'],
+      datasets: [{ data: [form1only, form2only, both], backgroundColor: ['#4a5c1a','#6b8c2a','#b5d96e'] }]
+    },
+    options: { plugins: { legend: { position: 'bottom', labels: { font: { size: 12 } } } }, responsive: true }
+  });
+}
+
+function renderVideoStats() {
+  const body = document.getElementById('video-stats-body');
+  const rows = PAGE_KEYS.map(page => {
+    const label = PAGE_LABELS[page];
+
+    // Sessions that reached this page
+    const reachedSessions = new Set(allEvents.filter(e => e.event_type === 'result_reached' && e.page === page).map(e => e.session_id));
+
+    // Avg time on page (page_time events)
+    const pageTimes = allEvents
+      .filter(e => e.event_type === 'page_time' && e.page === page && e.data && e.data.seconds_on_page)
+      .reduce((acc, e) => {
+        const s = e.session_id;
+        if (!acc[s] || e.data.seconds_on_page > acc[s]) acc[s] = e.data.seconds_on_page;
+        return acc;
+      }, {});
+    const pageTimeVals = Object.values(pageTimes);
+    const avgPageTime = pageTimeVals.length ? Math.round(pageTimeVals.reduce((a,b) => a+b,0) / pageTimeVals.length) : '—';
+
+    // Avg video watch time
+    const videoEvents = allEvents.filter(e => e.event_type === 'video_watch' && (e.page === page || (e.data && e.data.page === page)) && e.data && e.data.seconds_watched);
+    const videoBySession = {};
+    videoEvents.forEach(e => {
+      const s = e.session_id;
+      const sec = e.data.seconds_watched;
+      if (!videoBySession[s] || sec > videoBySession[s]) videoBySession[s] = sec;
+    });
+    const videoVals = Object.values(videoBySession);
+    const avgVideo = videoVals.length ? Math.round(videoVals.reduce((a,b) => a+b,0) / videoVals.length) : '—';
+
+    // Leads form 1 and form 2 for this page
+    const leads1 = new Set(allLeads.filter(l => l.result_page === page && l.form_number === 1).map(l => (l.phone||'').replace(/\D/g,'')||l.name)).size;
+    const leads2 = new Set(allLeads.filter(l => l.result_page === page && l.form_number === 2).map(l => (l.phone||'').replace(/\D/g,'')||l.name)).size;
+
+    return { label, reached: reachedSessions.size, avgPageTime, avgVideo, leads1, leads2 };
+  });
+
+  body.innerHTML = rows.map(r => `<tr>
+    <td><strong>${r.label}</strong></td>
+    <td>${r.reached}</td>
+    <td>${r.avgPageTime}</td>
+    <td>${r.avgVideo}</td>
+    <td>${r.leads1}</td>
+    <td>${r.leads2}</td>
+  </tr>`).join('');
+}
 </script>
 </body>
 </html>
