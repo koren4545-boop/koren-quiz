@@ -38,20 +38,24 @@
   .tab-panel.active { display: block; }
   .main { max-width: 1200px; margin: 0 auto; padding: 28px 20px 60px; }
 
-  /* Kanban board */
-  .kanban-wrap { padding: 24px 20px 60px; overflow-x: auto; }
-  .kanban-board { display: flex; gap: 14px; min-width: max-content; align-items: flex-start; }
-  .kanban-col { width: 250px; flex-shrink: 0; border-radius: 12px; background: #f0f2f5; overflow: hidden; }
-  .kanban-col-header { padding: 12px 14px; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: space-between; }
-  .kanban-col-count { font-size: 12px; background: rgba(0,0,0,0.12); border-radius: 20px; padding: 2px 8px; font-weight: 600; }
-  .kanban-cards { padding: 8px; display: flex; flex-direction: column; gap: 8px; min-height: 60px; }
-  .lead-card { background: #fff; border-radius: 10px; padding: 14px; box-shadow: 0 1px 4px rgba(0,0,0,0.07); border: 1px solid #e8e8e8; }
-  .lead-card-name { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
-  .lead-card-phone { font-size: 13px; color: #555; direction: ltr; text-align: right; margin-bottom: 4px; }
-  .lead-card-meta { font-size: 12px; color: #888; margin-bottom: 10px; line-height: 1.6; }
-  .lead-card-badges { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 10px; }
-  .lead-card-date { font-size: 11px; color: #bbb; margin-bottom: 10px; }
-  .status-select { width: 100%; padding: 7px 10px; border: 1.5px solid #e0e0e0; border-radius: 8px; font-size: 12px; font-family: inherit; cursor: pointer; background: #f9f9f9; color: #333; direction: rtl; }
+  /* Grouped leads list */
+  .leads-wrap { padding: 24px 20px 60px; max-width: 1100px; margin: 0 auto; }
+  .group-block { margin-bottom: 10px; border-radius: 12px; overflow: hidden; border: 1px solid #e0e0e0; background: #fff; }
+  .group-header { display: flex; align-items: center; gap: 10px; padding: 11px 16px; cursor: pointer; user-select: none; background: #fafafa; border-bottom: 1px solid #e0e0e0; }
+  .group-chevron { font-size: 12px; color: #888; transition: transform 0.2s; display: inline-block; }
+  .group-chevron.open { transform: rotate(90deg); }
+  .group-label { display: inline-flex; align-items: center; gap: 6px; padding: 3px 12px; border-radius: 20px; font-size: 13px; font-weight: 700; color: #fff; }
+  .group-count { font-size: 13px; color: #888; }
+  .group-rows { display: none; }
+  .group-rows.open { display: block; }
+
+  /* Table inside group */
+  .leads-table { width: 100%; border-collapse: collapse; }
+  .leads-table th { background: #f7f9f8; padding: 9px 14px; font-size: 11px; font-weight: 600; color: #777; text-align: right; border-bottom: 1px solid #ececec; white-space: nowrap; }
+  .leads-table td { padding: 10px 14px; font-size: 13px; border-bottom: 1px solid #f5f5f5; vertical-align: middle; }
+  .leads-table tr:last-child td { border-bottom: none; }
+  .leads-table tr:hover td { background: #fafffe; }
+  .status-select { padding: 5px 8px; border: 1.5px solid #e0e0e0; border-radius: 7px; font-size: 12px; font-family: inherit; cursor: pointer; background: #fff; color: #333; direction: rtl; }
   .status-select:focus { outline: none; border-color: #4a5c1a; }
 
   .badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 600; }
@@ -60,12 +64,12 @@
   .badge-both { background: #fff3cd; color: #856404; }
   .badge-page { background: #e8f4f8; color: #0c5460; }
 
-  .col-new .kanban-col-header { background: #2563eb; color: #fff; }
-  .col-irrelevant .kanban-col-header { background: #94a3b8; color: #fff; }
-  .col-trial .kanban-col-header { background: #f59e0b; color: #fff; }
-  .col-won .kanban-col-header { background: #16a34a; color: #fff; }
-  .col-lost .kanban-col-header { background: #dc2626; color: #fff; }
-  .col-notclosed .kanban-col-header { background: #7c3aed; color: #fff; }
+  .st-new       { background: #2563eb; }
+  .st-irrelevant{ background: #94a3b8; }
+  .st-trial     { background: #f59e0b; }
+  .st-won       { background: #16a34a; }
+  .st-lost      { background: #dc2626; }
+  .st-notclosed { background: #7c3aed; }
 
   .empty { text-align: center; padding: 50px; color: #aaa; font-size: 14px; }
 
@@ -125,9 +129,9 @@
 
   <!-- TAB: Leads -->
   <div class="tab-panel active" id="panel-leads">
-    <div class="kanban-wrap">
-      <div class="kanban-board" id="kanban-board">
-        <div class="empty" style="padding:60px 40px">טוען...</div>
+    <div class="leads-wrap">
+      <div id="kanban-board">
+        <div class="empty">טוען...</div>
       </div>
     </div>
   </div>
@@ -286,46 +290,56 @@ function renderKanban() {
     if (byStatus[st]) byStatus[st].push(r); else byStatus['new'].push(r);
   });
 
-  const selectOptions = STATUSES.map(s =>
-    `<option value="${s.id}">${s.label}</option>`
-  ).join('');
-
   board.innerHTML = STATUSES.map(s => {
-    const cards = byStatus[s.id];
-    return `<div class="kanban-col ${s.cls}">
-      <div class="kanban-col-header">
-        <span>${s.label}</span>
-        <span class="kanban-col-count">${cards.length}</span>
+    const group = byStatus[s.id];
+    const escapedId = s.id;
+    return `<div class="group-block">
+      <div class="group-header" onclick="toggleGroup('${escapedId}')">
+        <span class="group-chevron open" id="chev-${escapedId}">▶</span>
+        <span class="group-label st-${escapedId}">${s.label}</span>
+        <span class="group-count">${group.length}</span>
       </div>
-      <div class="kanban-cards">
-        ${cards.length === 0 ? '<div style="text-align:center;padding:16px;font-size:12px;color:#aaa">אין לידים</div>' :
-          cards.map(r => {
-            const d = new Date(r.created_at);
-            const date = d.toLocaleDateString('he-IL');
-            const pageLabel = PAGE_LABELS[r.result_page] || '—';
-            let formBadge = r.form1 && r.form2
-              ? '<span class="badge badge-both">טופס 1+2</span>'
-              : r.form2 ? '<span class="badge badge-form2">טופס 2</span>'
-              : '<span class="badge badge-form1">טופס 1</span>';
-            const escapedKey = r.key.replace(/'/g, "\\'");
-            return `<div class="lead-card">
-              <div class="lead-card-name">${r.name || '—'}</div>
-              <div class="lead-card-phone" dir="ltr">${r.phone || '—'}</div>
-              <div class="lead-card-meta">גיל הבן: ${r.age || '—'}</div>
-              <div class="lead-card-badges">
-                <span class="badge badge-page">${pageLabel}</span>
-                ${formBadge}
-              </div>
-              <div class="lead-card-date">${date}</div>
-              <select class="status-select" onchange="changeStatus('${escapedKey}', this.value)">
-                ${STATUSES.map(st => `<option value="${st.id}"${getStatus(r.key) === st.id ? ' selected' : ''}>${st.label}</option>`).join('')}
-              </select>
-            </div>`;
-          }).join('')
+      <div class="group-rows open" id="rows-${escapedId}">
+        ${group.length === 0
+          ? `<div style="padding:14px 16px;font-size:13px;color:#bbb">אין לידים בקטגוריה זו</div>`
+          : `<table class="leads-table">
+              <thead><tr>
+                <th>שם</th><th>טלפון</th><th>גיל הבן</th><th>סרטון</th><th>טפסים</th><th>תאריך</th><th>שינוי סטטוס</th>
+              </tr></thead>
+              <tbody>
+              ${group.map(r => {
+                const d = new Date(r.created_at);
+                const date = d.toLocaleDateString('he-IL') + ' ' + d.toLocaleTimeString('he-IL',{hour:'2-digit',minute:'2-digit'});
+                const pageLabel = PAGE_LABELS[r.result_page] || '—';
+                const formBadge = r.form1 && r.form2
+                  ? '<span class="badge badge-both">1+2</span>'
+                  : r.form2 ? '<span class="badge badge-form2">טופס 2</span>'
+                  : '<span class="badge badge-form1">טופס 1</span>';
+                const ek = r.key.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+                const opts = STATUSES.map(st => `<option value="${st.id}"${st.id===s.id?' selected':''}>${st.label}</option>`).join('');
+                return `<tr>
+                  <td><strong>${r.name||'—'}</strong></td>
+                  <td dir="ltr">${r.phone||'—'}</td>
+                  <td>${r.age||'—'}</td>
+                  <td><span class="badge badge-page">${pageLabel}</span></td>
+                  <td>${formBadge}</td>
+                  <td style="font-size:12px;color:#888;white-space:nowrap">${date}</td>
+                  <td><select class="status-select" onchange="changeStatus('${ek}',this.value)">${opts}</select></td>
+                </tr>`;
+              }).join('')}
+              </tbody>
+            </table>`
         }
       </div>
     </div>`;
   }).join('');
+}
+
+function toggleGroup(id) {
+  const rows = document.getElementById('rows-' + id);
+  const chev = document.getElementById('chev-' + id);
+  const isOpen = rows.classList.toggle('open');
+  chev.classList.toggle('open', isOpen);
 }
 
 function changeStatus(key, newStatus) {
