@@ -453,7 +453,7 @@ function checkFormReady() {
   document.getElementById(id).addEventListener('input', checkFormReady);
 });
 
-function submitForm() {
+async function submitForm() {
   const name = document.getElementById('f-name').value.trim();
   const phone = document.getElementById('f-phone').value.trim();
   const age = document.getElementById('f-age').value.trim();
@@ -465,9 +465,12 @@ function submitForm() {
   answers.forEach(a => { if (a !== null) counts[a]++; });
   const winner = counts.indexOf(Math.max(...counts));
   const params = new URLSearchParams({ name, phone, age });
-  trackLead(name, phone, age, resultPages[winner], 1);
-  trackEvent('form_submitted', {step: 7, result_page: resultPages[winner], form_number: 1});
-  setTimeout(() => { window.location.href = resultPages[winner] + '?' + params.toString(); }, 300);
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  btn.textContent = 'שולחת...';
+  await trackLead(name, phone, age, resultPages[winner], 1);
+  await trackEvent('form_submitted', {step: 7, result_page: resultPages[winner], form_number: 1});
+  window.location.href = resultPages[winner] + '?' + params.toString();
 }
 </script>
 </body>
