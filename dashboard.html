@@ -38,27 +38,34 @@
   .tab-panel.active { display: block; }
   .main { max-width: 1200px; margin: 0 auto; padding: 28px 20px 60px; }
 
-  /* Leads tab */
-  .leads-section { background: #fff; border-radius: 14px; border: 1px solid #e8ede9; overflow: hidden; }
-  .leads-header { display: flex; align-items: center; justify-content: space-between; padding: 18px 22px; border-bottom: 1px solid #e8ede9; flex-wrap: wrap; gap: 12px; }
-  .leads-header h3 { font-size: 16px; font-weight: 700; }
-  .leads-count { font-size: 13px; color: #666; }
-  .filter-btns { display: flex; gap: 8px; }
-  .filter-btn { background: #f0f2f5; border: none; border-radius: 7px; padding: 6px 14px; font-size: 13px; cursor: pointer; font-family: inherit; color: #444; }
-  .filter-btn.active { background: #4a5c1a; color: #fff; }
+  /* Kanban board */
+  .kanban-wrap { padding: 24px 20px 60px; overflow-x: auto; }
+  .kanban-board { display: flex; gap: 14px; min-width: max-content; align-items: flex-start; }
+  .kanban-col { width: 250px; flex-shrink: 0; border-radius: 12px; background: #f0f2f5; overflow: hidden; }
+  .kanban-col-header { padding: 12px 14px; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: space-between; }
+  .kanban-col-count { font-size: 12px; background: rgba(0,0,0,0.12); border-radius: 20px; padding: 2px 8px; font-weight: 600; }
+  .kanban-cards { padding: 8px; display: flex; flex-direction: column; gap: 8px; min-height: 60px; }
+  .lead-card { background: #fff; border-radius: 10px; padding: 14px; box-shadow: 0 1px 4px rgba(0,0,0,0.07); border: 1px solid #e8e8e8; }
+  .lead-card-name { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+  .lead-card-phone { font-size: 13px; color: #555; direction: ltr; text-align: right; margin-bottom: 4px; }
+  .lead-card-meta { font-size: 12px; color: #888; margin-bottom: 10px; line-height: 1.6; }
+  .lead-card-badges { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 10px; }
+  .lead-card-date { font-size: 11px; color: #bbb; margin-bottom: 10px; }
+  .status-select { width: 100%; padding: 7px 10px; border: 1.5px solid #e0e0e0; border-radius: 8px; font-size: 12px; font-family: inherit; cursor: pointer; background: #f9f9f9; color: #333; direction: rtl; }
+  .status-select:focus { outline: none; border-color: #4a5c1a; }
 
-  table { width: 100%; border-collapse: collapse; }
-  th { background: #f7f9f8; padding: 12px 16px; font-size: 12px; font-weight: 600; color: #555; text-align: right; border-bottom: 1px solid #e8ede9; white-space: nowrap; }
-  td { padding: 12px 16px; font-size: 14px; border-bottom: 1px solid #f0f2f5; vertical-align: middle; }
-  tr:last-child td { border-bottom: none; }
-  tr:hover td { background: #f7f9f8; }
-
-  .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 600; }
   .badge-form1 { background: #e5e9d0; color: #2e3d0e; }
   .badge-form2 { background: #d4edda; color: #155724; }
   .badge-both { background: #fff3cd; color: #856404; }
-  .badge-page { background: #e8f4f8; color: #0c5460; font-size: 11px; }
-  .badge-none { background: #f0f0f0; color: #888; }
+  .badge-page { background: #e8f4f8; color: #0c5460; }
+
+  .col-new .kanban-col-header { background: #2563eb; color: #fff; }
+  .col-irrelevant .kanban-col-header { background: #94a3b8; color: #fff; }
+  .col-trial .kanban-col-header { background: #f59e0b; color: #fff; }
+  .col-won .kanban-col-header { background: #16a34a; color: #fff; }
+  .col-lost .kanban-col-header { background: #dc2626; color: #fff; }
+  .col-notclosed .kanban-col-header { background: #7c3aed; color: #fff; }
 
   .empty { text-align: center; padding: 50px; color: #aaa; font-size: 14px; }
 
@@ -118,20 +125,9 @@
 
   <!-- TAB: Leads -->
   <div class="tab-panel active" id="panel-leads">
-    <div class="main">
-      <div class="leads-section">
-        <div class="leads-header">
-          <div>
-            <h3>לידים</h3>
-            <div class="leads-count" id="leads-count"></div>
-          </div>
-          <div class="filter-btns">
-            <button class="filter-btn active" onclick="filterLeads('all', this)">הכל</button>
-            <button class="filter-btn" onclick="filterLeads('form1only', this)">טופס 1 בלבד</button>
-            <button class="filter-btn" onclick="filterLeads('form2', this)">השאירו גם טופס 2</button>
-          </div>
-        </div>
-        <div id="leads-table-wrap"><div class="empty">טוען...</div></div>
+    <div class="kanban-wrap">
+      <div class="kanban-board" id="kanban-board">
+        <div class="empty" style="padding:60px 40px">טוען...</div>
       </div>
     </div>
   </div>
@@ -233,11 +229,11 @@ let allLeads = [], allEvents = [];
 let chartFunnel, chartResults, chartForms;
 
 async function loadAll() {
-  document.getElementById('leads-table-wrap').innerHTML = '<div class="empty">טוען...</div>';
+  document.getElementById('kanban-board').innerHTML = '<div class="empty" style="padding:60px 40px">טוען...</div>';
   const [events, leads] = await Promise.all([sbGet('events'), sbGet('leads')]);
   allLeads = Array.isArray(leads) ? leads : [];
   allEvents = Array.isArray(events) ? events : [];
-  renderLeadsTable('all');
+  renderKanban();
   renderStats();
   renderFunnel();
   renderResultsChart();
@@ -245,56 +241,96 @@ async function loadAll() {
   renderVideoStats();
 }
 
-/* ── LEADS TAB ── */
+/* ── KANBAN ── */
 
-function filterLeads(filter, btn) {
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  renderLeadsTable(filter);
+const STATUSES = [
+  { id: 'new',       label: 'ליד חדש',                     cls: 'col-new' },
+  { id: 'irrelevant',label: 'לא רלוונטי',                  cls: 'col-irrelevant' },
+  { id: 'trial',     label: 'בשבוע ניסיון',                cls: 'col-trial' },
+  { id: 'won',       label: 'סגר אחרי שבוע ניסיון',       cls: 'col-won' },
+  { id: 'lost',      label: 'לא סגר אחרי שבוע ניסיון',    cls: 'col-lost' },
+  { id: 'notclosed', label: 'לא נסגר',                     cls: 'col-notclosed' }
+];
+
+function leadKey(l) {
+  return (l.phone || '').replace(/\D/g, '') || (l.name + '|' + (l.age || ''));
 }
 
-function renderLeadsTable(filter) {
-  // Build per-phone map: phone → { lead data, forms submitted }
+function getStatus(key) {
+  return localStorage.getItem('ks_' + key) || 'new';
+}
+
+function setStatus(key, status) {
+  localStorage.setItem('ks_' + key, status);
+}
+
+function buildLeadRows() {
   const byPhone = {};
   allLeads.forEach(l => {
-    const key = (l.phone || '').replace(/\D/g, '') || (l.name + '|' + (l.age||''));
-    if (!byPhone[key]) byPhone[key] = { name: l.name, phone: l.phone, age: l.age, result_page: l.result_page, created_at: l.created_at, form1: false, form2: false };
+    const key = leadKey(l);
+    if (!byPhone[key]) byPhone[key] = { key, name: l.name, phone: l.phone, age: l.age, result_page: l.result_page, created_at: l.created_at, form1: false, form2: false };
     if (Number(l.form_number) === 1) { byPhone[key].form1 = true; byPhone[key].name = l.name; byPhone[key].age = l.age; byPhone[key].result_page = l.result_page; }
-    if (Number(l.form_number) === 2) { byPhone[key].form2 = true; }
+    if (Number(l.form_number) === 2) byPhone[key].form2 = true;
+  });
+  return Object.values(byPhone).sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+}
+
+function renderKanban() {
+  const rows = buildLeadRows();
+  const board = document.getElementById('kanban-board');
+
+  const byStatus = {};
+  STATUSES.forEach(s => byStatus[s.id] = []);
+  rows.forEach(r => {
+    const st = getStatus(r.key);
+    if (byStatus[st]) byStatus[st].push(r); else byStatus['new'].push(r);
   });
 
-  let rows = Object.values(byPhone);
-  if (filter === 'form1only') rows = rows.filter(r => r.form1 && !r.form2);
-  if (filter === 'form2') rows = rows.filter(r => r.form2);
+  const selectOptions = STATUSES.map(s =>
+    `<option value="${s.id}">${s.label}</option>`
+  ).join('');
 
-  // Sort newest first
-  rows.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+  board.innerHTML = STATUSES.map(s => {
+    const cards = byStatus[s.id];
+    return `<div class="kanban-col ${s.cls}">
+      <div class="kanban-col-header">
+        <span>${s.label}</span>
+        <span class="kanban-col-count">${cards.length}</span>
+      </div>
+      <div class="kanban-cards">
+        ${cards.length === 0 ? '<div style="text-align:center;padding:16px;font-size:12px;color:#aaa">אין לידים</div>' :
+          cards.map(r => {
+            const d = new Date(r.created_at);
+            const date = d.toLocaleDateString('he-IL');
+            const pageLabel = PAGE_LABELS[r.result_page] || '—';
+            let formBadge = r.form1 && r.form2
+              ? '<span class="badge badge-both">טופס 1+2</span>'
+              : r.form2 ? '<span class="badge badge-form2">טופס 2</span>'
+              : '<span class="badge badge-form1">טופס 1</span>';
+            const escapedKey = r.key.replace(/'/g, "\\'");
+            return `<div class="lead-card">
+              <div class="lead-card-name">${r.name || '—'}</div>
+              <div class="lead-card-phone" dir="ltr">${r.phone || '—'}</div>
+              <div class="lead-card-meta">גיל הבן: ${r.age || '—'}</div>
+              <div class="lead-card-badges">
+                <span class="badge badge-page">${pageLabel}</span>
+                ${formBadge}
+              </div>
+              <div class="lead-card-date">${date}</div>
+              <select class="status-select" onchange="changeStatus('${escapedKey}', this.value)">
+                ${STATUSES.map(st => `<option value="${st.id}"${getStatus(r.key) === st.id ? ' selected' : ''}>${st.label}</option>`).join('')}
+              </select>
+            </div>`;
+          }).join('')
+        }
+      </div>
+    </div>`;
+  }).join('');
+}
 
-  document.getElementById('leads-count').textContent = rows.length + ' לידים';
-
-  const wrap = document.getElementById('leads-table-wrap');
-  if (!rows.length) { wrap.innerHTML = '<div class="empty">אין לידים</div>'; return; }
-
-  wrap.innerHTML = '<table><thead><tr>' +
-    '<th>שם</th><th>טלפון</th><th>גיל הבן</th><th>סרטון שראה</th><th>השאיר פרטים</th><th>תאריך</th>' +
-    '</tr></thead><tbody>' +
-    rows.map(r => {
-      const d = new Date(r.created_at);
-      const date = d.toLocaleDateString('he-IL') + ' ' + d.toLocaleTimeString('he-IL', {hour:'2-digit',minute:'2-digit'});
-      const pageLabel = PAGE_LABELS[r.result_page] || r.result_page || '—';
-      let formBadge;
-      if (r.form1 && r.form2) formBadge = '<span class="badge badge-both">טופס 1 + 2</span>';
-      else if (r.form2) formBadge = '<span class="badge badge-form2">טופס 2</span>';
-      else formBadge = '<span class="badge badge-form1">טופס 1</span>';
-      return `<tr>
-        <td><strong>${r.name||'—'}</strong></td>
-        <td dir="ltr">${r.phone||'—'}</td>
-        <td>${r.age||'—'}</td>
-        <td><span class="badge badge-page">${pageLabel}</span></td>
-        <td>${formBadge}</td>
-        <td style="font-size:12px;color:#666">${date}</td>
-      </tr>`;
-    }).join('') + '</tbody></table>';
+function changeStatus(key, newStatus) {
+  setStatus(key, newStatus);
+  renderKanban();
 }
 
 /* ── STATS TAB ── */
