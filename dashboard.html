@@ -188,8 +188,8 @@
               <th>הגיעו לדף</th>
               <th>זמן ממוצע בדף (שניות)</th>
               <th>זמן צפייה ממוצע (שניות)</th>
-              <th>השאירו פרטים (טופס 1)</th>
-              <th>השאירו פרטים (טופס 2)</th>
+              <th>סיים שאלון</th>
+              <th>מתעניין בשבוע ניסיון</th>
             </tr>
           </thead>
           <tbody id="video-stats-body"></tbody>
@@ -322,9 +322,9 @@ function renderKanban() {
                 const date = d.toLocaleDateString('he-IL') + ' ' + d.toLocaleTimeString('he-IL',{hour:'2-digit',minute:'2-digit'});
                 const pageLabel = PAGE_LABELS[r.result_page] || '—';
                 const formBadge = r.form1 && r.form2
-                  ? '<span class="badge badge-both">1+2</span>'
-                  : r.form2 ? '<span class="badge badge-form2">טופס 2</span>'
-                  : '<span class="badge badge-form1">טופס 1</span>';
+                  ? '<span class="badge badge-both">מתעניין בשבוע ניסיון</span>'
+                  : r.form2 ? '<span class="badge badge-form2">מתעניין בשבוע ניסיון</span>'
+                  : '<span class="badge badge-form1">סיים שאלון</span>';
                 const ek = r.key.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
                 const opts = STATUSES.map(st => `<option value="${st.id}"${st.id===s.id?' selected':''}>${st.label}</option>`).join('');
                 return `<tr>
@@ -450,7 +450,7 @@ function renderFormsChart() {
   chartForms = new Chart(document.getElementById('chart-forms'), {
     type: 'doughnut',
     data: {
-      labels: ['טופס 1 בלבד', 'טופס 2 בלבד', 'שני הטפסים'],
+      labels: ['סיים שאלון בלבד', 'מתעניין בשבוע ניסיון', 'שניהם'],
       datasets: [{ data: [form1only, form2only, both], backgroundColor: ['#f59e0b','#8b5cf6','#06b6d4'] }]
     },
     options: { plugins: { legend: { position: 'bottom', labels: { font: { size: 12 } } } }, responsive: true }

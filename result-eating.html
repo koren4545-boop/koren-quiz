@@ -145,12 +145,12 @@
   ['f2-name','f2-phone','f2-age'].forEach(id => {
     document.getElementById(id).addEventListener('input', checkForm2);
   });
-  function submitForm2() {
+  async function submitForm2() {
     const n = document.getElementById('f2-name').value.trim();
     const p = document.getElementById('f2-phone').value.trim();
     const a = document.getElementById('f2-age').value.trim();
     if (!n || !p || !a) { alert('נא למלא את כל השדות'); return; }
-    trackLead(n, p, a, 'result-eating.html', 2);
+    await trackLead(n, p, a, 'result-eating.html', 2);
     document.getElementById('form2-area').style.display = 'none';
     document.getElementById('thanks2-area').style.display = 'block';
   }
