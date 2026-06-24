@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>פורטל יועצים — קורן צבר</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f5; color: #1a1a1a; direction: rtl; min-height: 100vh; }
+
+/* Login */
+#login-screen { display: flex; align-items: center; justify-content: center; min-height: 100vh; background: linear-gradient(135deg, #2e3d0e, #4a5c1a); }
+.login-card { background: #fff; border-radius: 16px; padding: 40px 32px; width: 340px; text-align: center; box-shadow: 0 8px 32px rgba(0,0,0,0.18); }
+.login-card h2 { font-size: 22px; margin-bottom: 6px; color: #1a1a1a; }
+.login-card p { font-size: 13px; color: #666; margin-bottom: 28px; }
+.employee-btns { display: flex; gap: 10px; margin-bottom: 18px; }
+.emp-btn { flex: 1; padding: 12px; border: 2px solid #cdd2b0; border-radius: 10px; background: #fff; font-size: 15px; font-family: inherit; cursor: pointer; color: #333; transition: all 0.15s; font-weight: 600; }
+.emp-btn:hover { border-color: #4a5c1a; background: #f0f4e4; }
+.emp-btn.selected { border-color: #4a5c1a; background: #4a5c1a; color: #fff; }
+.login-card input { width: 100%; padding: 12px 14px; border: 1.5px solid #cdd2b0; border-radius: 10px; font-size: 15px; font-family: inherit; margin-bottom: 14px; direction: ltr; text-align: center; }
+.login-card input:focus { outline: none; border-color: #4a5c1a; }
+.login-card button.submit { width: 100%; background: #4a5c1a; color: #fff; border: none; border-radius: 10px; padding: 13px; font-size: 16px; font-weight: 700; cursor: pointer; font-family: inherit; }
+.login-card button.submit:hover { background: #2e3d0e; }
+.login-err { color: #c0392b; font-size: 13px; margin-top: 8px; display: none; }
+
+/* App shell */
+#app { display: none; }
+.top-bar { background: linear-gradient(135deg, #2e3d0e, #4a5c1a); color: #fff; padding: 0 28px; display: flex; align-items: center; justify-content: space-between; height: 58px; }
+.top-bar-title { font-size: 17px; font-weight: 700; }
+.top-bar-user { display: flex; align-items: center; gap: 14px; font-size: 14px; }
+.logout-btn { background: rgba(255,255,255,0.2); border: none; color: #fff; border-radius: 8px; padding: 7px 14px; font-size: 13px; cursor: pointer; font-family: inherit; }
+.logout-btn:hover { background: rgba(255,255,255,0.3); }
+
+.main { max-width: 900px; margin: 0 auto; padding: 28px 20px 60px; }
+
+/* Stats section */
+.section-title { font-size: 17px; font-weight: 700; color: #1a1a1a; margin-bottom: 16px; }
+.stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 10px; }
+.stat-card { background: #fff; border-radius: 14px; padding: 20px 16px; text-align: center; border: 1.5px solid #e8ede9; }
+.stat-card .stat-label { font-size: 12px; color: #666; margin-bottom: 10px; line-height: 1.4; font-weight: 600; }
+.stat-card input[type=number] { width: 100%; border: 1.5px solid #cdd2b0; border-radius: 8px; padding: 10px; font-size: 28px; font-weight: 700; color: #2e3d0e; text-align: center; font-family: inherit; }
+.stat-card input[type=number]:focus { outline: none; border-color: #4a5c1a; }
+.stat-card input[type=number]::-webkit-inner-spin-button { opacity: 1; }
+
+/* Hide number arrows for cleaner look */
+.stat-card input[type=number]::-webkit-outer-spin-button,
+.stat-card input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+.save-stats-row { display: flex; align-items: center; gap: 12px; margin-bottom: 32px; }
+.btn-primary { background: #4a5c1a; color: #fff; border: none; border-radius: 10px; padding: 12px 28px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit; }
+.btn-primary:hover { background: #2e3d0e; }
+.save-msg { font-size: 13px; color: #16a34a; display: none; }
+
+/* Issues section */
+.section-card { background: #fff; border-radius: 14px; padding: 22px; border: 1.5px solid #e8ede9; margin-bottom: 22px; }
+
+.add-issue-form { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+.add-issue-form input { flex: 1; min-width: 140px; padding: 10px 14px; border: 1.5px solid #cdd2b0; border-radius: 10px; font-size: 14px; font-family: inherit; }
+.add-issue-form input:focus { outline: none; border-color: #4a5c1a; }
+.add-issue-form textarea { flex: 3; min-width: 200px; padding: 10px 14px; border: 1.5px solid #cdd2b0; border-radius: 10px; font-size: 14px; font-family: inherit; resize: vertical; min-height: 42px; }
+.add-issue-form textarea:focus { outline: none; border-color: #4a5c1a; }
+.btn-add { background: #4a5c1a; color: #fff; border: none; border-radius: 10px; padding: 10px 22px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit; white-space: nowrap; }
+.btn-add:hover { background: #2e3d0e; }
+
+.issues-table { width: 100%; border-collapse: collapse; }
+.issues-table th { background: #f7f9f8; padding: 9px 14px; font-size: 11px; font-weight: 600; color: #777; text-align: right; border-bottom: 1px solid #ececec; }
+.issues-table td { padding: 11px 14px; font-size: 13px; border-bottom: 1px solid #f5f5f5; vertical-align: top; }
+.issues-table tr:last-child td { border-bottom: none; }
+.issues-table tr.resolved td { opacity: 0.45; }
+.badge-open { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; background: #fee2e2; color: #b91c1c; }
+.badge-resolved { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; background: #dcfce7; color: #15803d; }
+.btn-resolve { background: none; border: 1.5px solid #cdd2b0; border-radius: 8px; padding: 4px 12px; font-size: 12px; cursor: pointer; font-family: inherit; color: #444; }
+.btn-resolve:hover { border-color: #4a5c1a; color: #2e3d0e; }
+.btn-delete { background: none; border: none; cursor: pointer; color: #ccc; font-size: 16px; padding: 2px 6px; }
+.btn-delete:hover { color: #c0392b; }
+.empty-issues { text-align: center; color: #bbb; font-size: 14px; padding: 28px 0; }
+
+@media (max-width: 640px) {
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .add-issue-form { flex-direction: column; }
+  .top-bar { padding: 0 16px; }
+}
+</style>
+</head>
+<body>
+
+<!-- Login -->
+<div id="login-screen">
+  <div class="login-card">
+    <h2>פורטל יועצים</h2>
+    <p>בחרי את שמך והכניסי סיסמה</p>
+    <div class="employee-btns">
+      <button class="emp-btn" onclick="selectEmployee('ליאור', this)">ליאור</button>
+      <button class="emp-btn" onclick="selectEmployee('יניב', this)">יניב</button>
+    </div>
+    <input type="password" id="pwd-input" placeholder="סיסמה" />
+    <button class="submit" onclick="doLogin()">כניסה</button>
+    <div class="login-err" id="login-err">שם משתמש או סיסמה שגויים</div>
+  </div>
+</div>
+
+<!-- App -->
+<div id="app">
+  <div class="top-bar">
+    <div class="top-bar-title">פורטל יועצים — קורן צבר</div>
+    <div class="top-bar-user">
+      <span id="header-name"></span>
+      <button class="logout-btn" onclick="doLogout()">התנתק/י</button>
+    </div>
+  </div>
+
+  <div class="main">
+
+    <!-- Stats -->
+    <div class="section-title">עדכון נתוני מתאמנים</div>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">מתאמנים פעילים</div>
+        <input type="number" id="s-active" min="0" value="0">
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">ירדו במשקל</div>
+        <input type="number" id="s-weight" min="0" value="0">
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">ביקשו לבטל תהליך</div>
+        <input type="number" id="s-cancel" min="0" value="0">
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">בהקפאה</div>
+        <input type="number" id="s-frozen" min="0" value="0">
+      </div>
+    </div>
+    <div class="save-stats-row">
+      <button class="btn-primary" onclick="saveStats()">שמור נתונים</button>
+      <span class="save-msg" id="save-msg">✓ נשמר בהצלחה</span>
+    </div>
+
+    <!-- Issues -->
+    <div class="section-card">
+      <div class="section-title" style="margin-bottom:18px">דיווח בעיות לפי מתאמן</div>
+
+      <div class="add-issue-form">
+        <input type="text" id="new-trainee" placeholder="שם מתאמן">
+        <textarea id="new-issue" placeholder="תאר/י את הבעיה..." rows="1"></textarea>
+        <button class="btn-add" onclick="addIssue()">+ הוסף בעיה</button>
+      </div>
+
+      <div id="issues-container">
+        <div class="empty-issues">טוען...</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://hnyidycwpzayjxnturni.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_nFIbqvHIKFVcF7A29DIzGg_eQqsD881';
+const SB_HEADERS = {
+  'Content-Type': 'application/json',
+  'apikey': SUPABASE_KEY,
+  'Authorization': 'Bearer ' + SUPABASE_KEY
+};
+
+// ── עובדים וסיסמאות ──
+const EMPLOYEES = {
+  'ליאור': 'lior2024',
+  'יניב':  'yaniv2024'
+};
+
+let currentEmployee = null;
+let selectedName = null;
+
+function selectEmployee(name, btn) {
+  selectedName = name;
+  document.querySelectorAll('.emp-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  document.getElementById('pwd-input').focus();
+}
+
+document.getElementById('pwd-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doLogin();
+});
+
+function doLogin() {
+  const pwd = document.getElementById('pwd-input').value;
+  if (!selectedName) { document.getElementById('login-err').textContent = 'נא לבחור שם'; document.getElementById('login-err').style.display = 'block'; return; }
+  if (EMPLOYEES[selectedName] !== pwd) { document.getElementById('login-err').style.display = 'block'; return; }
+  currentEmployee = selectedName;
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  document.getElementById('header-name').textContent = 'שלום, ' + currentEmployee;
+  loadData();
+}
+
+function doLogout() {
+  currentEmployee = null;
+  selectedName = null;
+  document.querySelectorAll('.emp-btn').forEach(b => b.classList.remove('selected'));
+  document.getElementById('pwd-input').value = '';
+  document.getElementById('login-err').style.display = 'none';
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+}
+
+// ── Supabase helpers ──
+async function sbGet(table, params) {
+  const res = await fetch(SUPABASE_URL + '/rest/v1/' + table + '?' + params, { headers: SB_HEADERS });
+  return res.json();
+}
+
+// ── Load data ──
+async function loadData() {
+  await Promise.all([loadStats(), loadIssues()]);
+}
+
+async function loadStats() {
+  const data = await sbGet('staff_reports', 'employee_name=eq.' + encodeURIComponent(currentEmployee) + '&limit=1');
+  if (Array.isArray(data) && data.length > 0) {
+    const r = data[0];
+    document.getElementById('s-active').value  = r.active_trainees || 0;
+    document.getElementById('s-weight').value  = r.weight_loss || 0;
+    document.getElementById('s-cancel').value  = r.cancellations || 0;
+    document.getElementById('s-frozen').value  = r.frozen || 0;
+  }
+}
+
+async function saveStats() {
+  const payload = {
+    employee_name:    currentEmployee,
+    active_trainees:  parseInt(document.getElementById('s-active').value) || 0,
+    weight_loss:      parseInt(document.getElementById('s-weight').value) || 0,
+    cancellations:    parseInt(document.getElementById('s-cancel').value) || 0,
+    frozen:           parseInt(document.getElementById('s-frozen').value) || 0,
+    updated_at:       new Date().toISOString()
+  };
+  await fetch(SUPABASE_URL + '/rest/v1/staff_reports', {
+    method: 'POST',
+    headers: { ...SB_HEADERS, 'Prefer': 'resolution=merge-duplicates' },
+    body: JSON.stringify(payload)
+  });
+  const msg = document.getElementById('save-msg');
+  msg.style.display = 'inline';
+  setTimeout(() => msg.style.display = 'none', 2500);
+}
+
+// ── Issues ──
+let issues = [];
+
+async function loadIssues() {
+  const data = await sbGet('staff_issues',
+    'employee_name=eq.' + encodeURIComponent(currentEmployee) + '&order=created_at.desc'
+  );
+  issues = Array.isArray(data) ? data : [];
+  renderIssues();
+}
+
+function renderIssues() {
+  const container = document.getElementById('issues-container');
+  if (issues.length === 0) {
+    container.innerHTML = '<div class="empty-issues">אין בעיות מדווחות כרגע</div>';
+    return;
+  }
+  container.innerHTML = `<table class="issues-table">
+    <thead><tr><th>מתאמן</th><th>בעיה</th><th>תאריך</th><th>סטטוס</th><th></th><th></th></tr></thead>
+    <tbody>
+    ${issues.map(issue => {
+      const d = new Date(issue.created_at);
+      const date = d.toLocaleDateString('he-IL');
+      const badge = issue.resolved
+        ? '<span class="badge-resolved">טופלה</span>'
+        : '<span class="badge-open">פתוחה</span>';
+      const resolveBtn = issue.resolved ? '' : `<button class="btn-resolve" onclick="resolveIssue('${issue.id}')">סמן כטופלה</button>`;
+      return `<tr class="${issue.resolved ? 'resolved' : ''}">
+        <td><strong>${issue.trainee_name}</strong></td>
+        <td>${issue.issue}</td>
+        <td style="font-size:12px;color:#888;white-space:nowrap">${date}</td>
+        <td>${badge}</td>
+        <td>${resolveBtn}</td>
+        <td><button class="btn-delete" onclick="deleteIssue('${issue.id}')" title="מחק">✕</button></td>
+      </tr>`;
+    }).join('')}
+    </tbody>
+  </table>`;
+}
+
+async function addIssue() {
+  const trainee = document.getElementById('new-trainee').value.trim();
+  const issueText = document.getElementById('new-issue').value.trim();
+  if (!trainee || !issueText) { alert('נא למלא שם מתאמן ותיאור בעיה'); return; }
+  await fetch(SUPABASE_URL + '/rest/v1/staff_issues', {
+    method: 'POST',
+    headers: SB_HEADERS,
+    body: JSON.stringify({ employee_name: currentEmployee, trainee_name: trainee, issue: issueText })
+  });
+  document.getElementById('new-trainee').value = '';
+  document.getElementById('new-issue').value = '';
+  await loadIssues();
+}
+
+async function resolveIssue(id) {
+  await fetch(SUPABASE_URL + '/rest/v1/staff_issues?id=eq.' + id, {
+    method: 'PATCH',
+    headers: SB_HEADERS,
+    body: JSON.stringify({ resolved: true })
+  });
+  await loadIssues();
+}
+
+async function deleteIssue(id) {
+  if (!confirm('למחוק את הבעיה?')) return;
+  await fetch(SUPABASE_URL + '/rest/v1/staff_issues?id=eq.' + id, {
+    method: 'DELETE',
+    headers: SB_HEADERS
+  });
+  await loadIssues();
+}
+</script>
+</body>
+</html>

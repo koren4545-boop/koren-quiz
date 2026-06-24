@@ -7,7 +7,7 @@
 <title>דשבורד — קורן צבר</title>
 <script>
 (function(){
-  var V='9';
+  var V='10';
   var u=new URL(location.href);
   if(u.searchParams.get('v')!==V){u.searchParams.set('v',V);location.replace(u.toString());}
 })();
@@ -106,6 +106,14 @@
   .period-btn { padding: 6px 14px; border: 1.5px solid #cdd2b0; border-radius: 20px; font-size: 13px; font-family: inherit; background: #fff; cursor: pointer; color: #444; transition: all 0.15s; }
   .period-btn:hover { background: #f0f4e4; border-color: #4a5c1a; color: #2e3d0e; }
   .period-btn.active { background: #4a5c1a; border-color: #4a5c1a; color: #fff; font-weight: 600; }
+  .btn-primary-sm { background: #4a5c1a; color: #fff; border: none; border-radius: 8px; padding: 9px 22px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; }
+  .btn-primary-sm:hover { background: #2e3d0e; }
+  .pay-input { width: 110px; padding: 7px 10px; border: 1.5px solid #cdd2b0; border-radius: 8px; font-size: 14px; font-family: inherit; text-align: center; }
+  .pay-input:focus { outline: none; border-color: #4a5c1a; }
+  .notes-input { width: 200px; padding: 7px 10px; border: 1.5px solid #cdd2b0; border-radius: 8px; font-size: 13px; font-family: inherit; }
+  .notes-input:focus { outline: none; border-color: #4a5c1a; }
+  .badge-open { display:inline-block;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:600;background:#fee2e2;color:#b91c1c; }
+  .badge-resolved { display:inline-block;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:600;background:#dcfce7;color:#15803d; }
 
   @media (max-width: 750px) {
     .stats-grid { grid-template-columns: repeat(2, 1fr); }
@@ -133,6 +141,7 @@
     <div class="tabs">
       <div class="tab active" onclick="switchTab('leads', this)">לידים</div>
       <div class="tab" onclick="switchTab('stats', this)">סטטיסטיקות</div>
+      <div class="tab" onclick="switchTab('staff', this)">צוות</div>
     </div>
     <div class="top-bar-actions">
       <button class="refresh-btn" onclick="loadAll()">↻ רענן</button>
@@ -217,6 +226,63 @@
 
     </div>
   </div>
+
+  <!-- TAB: Staff -->
+  <div class="tab-panel" id="panel-staff">
+    <div class="main">
+
+      <!-- Employee stats -->
+      <div class="section-card" style="margin-bottom:22px">
+        <h3>נתוני יועצים</h3>
+        <table class="video-stats-table" id="staff-stats-table">
+          <thead><tr>
+            <th>יועץ</th>
+            <th>מתאמנים פעילים</th>
+            <th>ירדו במשקל</th>
+            <th>ביקשו לבטל</th>
+            <th>בהקפאה</th>
+            <th>עדכון אחרון</th>
+          </tr></thead>
+          <tbody id="staff-stats-body"><tr><td colspan="6" style="text-align:center;color:#bbb;padding:20px">טוען...</td></tr></tbody>
+        </table>
+      </div>
+
+      <!-- Payments -->
+      <div class="section-card" style="margin-bottom:22px">
+        <div style="display:flex;align-items:center;gap:16px;margin-bottom:18px;flex-wrap:wrap;">
+          <h3 style="margin-bottom:0">תשלומים ליועצים</h3>
+          <label style="font-size:13px;color:#555;margin-bottom:0">חודש:
+            <input type="month" id="payment-month" style="margin-right:8px;padding:6px 10px;border:1.5px solid #cdd2b0;border-radius:8px;font-size:13px;font-family:inherit;" onchange="loadPayments()">
+          </label>
+        </div>
+        <table class="video-stats-table">
+          <thead><tr><th>יועץ</th><th>מתאמנים פעילים</th><th>סכום לתשלום (₪)</th><th>הערות</th><th></th></tr></thead>
+          <tbody id="payments-body"><tr><td colspan="5" style="text-align:center;color:#bbb;padding:20px">בחר חודש</td></tr></tbody>
+        </table>
+        <div style="margin-top:14px;display:flex;gap:12px;align-items:center;">
+          <button class="btn-primary-sm" onclick="savePayments()">שמור תשלומים</button>
+          <span id="pay-save-msg" style="font-size:13px;color:#16a34a;display:none">✓ נשמר</span>
+        </div>
+      </div>
+
+      <!-- Issues log -->
+      <div class="section-card">
+        <h3>בעיות מדווחות</h3>
+        <div style="margin-bottom:14px;display:flex;gap:10px;flex-wrap:wrap;">
+          <button class="period-btn active" onclick="filterIssues('all',this)" id="iss-all">הכל</button>
+          <button class="period-btn" onclick="filterIssues('open',this)">פתוחות</button>
+          <button class="period-btn" onclick="filterIssues('resolved',this)">טופלו</button>
+          <button class="period-btn" onclick="filterIssues('ליאור',this)">ליאור</button>
+          <button class="period-btn" onclick="filterIssues('יניב',this)">יניב</button>
+        </div>
+        <table class="video-stats-table" id="issues-table">
+          <thead><tr><th>יועץ</th><th>מתאמן</th><th>בעיה</th><th>תאריך</th><th>סטטוס</th></tr></thead>
+          <tbody id="issues-body"><tr><td colspan="5" style="text-align:center;color:#bbb;padding:20px">טוען...</td></tr></tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
 </div>
 
 <script>
@@ -250,6 +316,7 @@ function switchTab(name, el) {
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
   el.classList.add('active');
   document.getElementById('panel-' + name).classList.add('active');
+  if (name === 'staff') loadStaff();
 }
 
 async function sbGet(table, params) {
@@ -560,6 +627,117 @@ function renderFormsChart() {
     },
     options: { plugins: { legend: { position: 'bottom', labels: { font: { size: 12 } } } }, responsive: true }
   });
+}
+
+/* ── STAFF TAB ── */
+const STAFF_NAMES = ['ליאור', 'יניב'];
+let allStaffReports = [], allStaffIssues = [], allPayments = [];
+let issueFilter = 'all';
+
+async function loadStaff() {
+  const [reports, issues] = await Promise.all([
+    sbGet('staff_reports', 'select=*'),
+    sbGet('staff_issues', 'select=*&order=created_at.desc')
+  ]);
+  allStaffReports = Array.isArray(reports) ? reports : [];
+  allStaffIssues  = Array.isArray(issues)  ? issues  : [];
+  renderStaffStats();
+  renderIssuesLog();
+  // set current month default
+  const now = new Date();
+  const m = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
+  if (!document.getElementById('payment-month').value) {
+    document.getElementById('payment-month').value = m;
+    await loadPayments();
+  }
+}
+
+function renderStaffStats() {
+  const tbody = document.getElementById('staff-stats-body');
+  tbody.innerHTML = STAFF_NAMES.map(name => {
+    const r = allStaffReports.find(r => r.employee_name === name) || {};
+    const upd = r.updated_at ? new Date(r.updated_at).toLocaleDateString('he-IL') : '—';
+    return `<tr>
+      <td><strong>${name}</strong></td>
+      <td style="text-align:center;font-size:18px;font-weight:700;color:#2e3d0e">${r.active_trainees ?? '—'}</td>
+      <td style="text-align:center">${r.weight_loss ?? '—'}</td>
+      <td style="text-align:center">${r.cancellations ?? '—'}</td>
+      <td style="text-align:center">${r.frozen ?? '—'}</td>
+      <td style="font-size:12px;color:#888">${upd}</td>
+    </tr>`;
+  }).join('');
+}
+
+async function loadPayments() {
+  const month = document.getElementById('payment-month').value;
+  if (!month) return;
+  const data = await sbGet('staff_payments', 'month=eq.' + month);
+  allPayments = Array.isArray(data) ? data : [];
+  renderPayments(month);
+}
+
+function renderPayments(month) {
+  const tbody = document.getElementById('payments-body');
+  tbody.innerHTML = STAFF_NAMES.map(name => {
+    const r = allStaffReports.find(r => r.employee_name === name) || {};
+    const p = allPayments.find(p => p.employee_name === name) || {};
+    return `<tr>
+      <td><strong>${name}</strong></td>
+      <td style="text-align:center;font-weight:700;color:#2e3d0e">${r.active_trainees ?? 0}</td>
+      <td><input class="pay-input" id="pay-amount-${name}" type="number" min="0" value="${p.amount || ''}" placeholder="0"></td>
+      <td><input class="notes-input" id="pay-notes-${name}" type="text" value="${p.notes || ''}" placeholder="הערות..."></td>
+      <td style="font-size:13px;color:#888">${p.amount ? '₪' + Number(p.amount).toLocaleString('he-IL') : ''}</td>
+    </tr>`;
+  }).join('');
+}
+
+async function savePayments() {
+  const month = document.getElementById('payment-month').value;
+  if (!month) { alert('נא לבחור חודש'); return; }
+  await Promise.all(STAFF_NAMES.map(name => {
+    const amount = parseFloat(document.getElementById('pay-amount-' + name).value) || 0;
+    const notes  = document.getElementById('pay-notes-' + name).value.trim();
+    return fetch(SUPABASE_URL + '/rest/v1/staff_payments', {
+      method: 'POST',
+      headers: { ...SB_HEADERS, 'Prefer': 'resolution=merge-duplicates' },
+      body: JSON.stringify({ employee_name: name, month, amount, notes, updated_at: new Date().toISOString() })
+    });
+  }));
+  const msg = document.getElementById('pay-save-msg');
+  msg.style.display = 'inline';
+  setTimeout(() => msg.style.display = 'none', 2500);
+  await loadPayments();
+}
+
+function filterIssues(filter, btn) {
+  issueFilter = filter;
+  document.querySelectorAll('#panel-staff .period-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderIssuesLog();
+}
+
+function renderIssuesLog() {
+  let list = allStaffIssues;
+  if (issueFilter === 'open')     list = list.filter(i => !i.resolved);
+  if (issueFilter === 'resolved') list = list.filter(i => i.resolved);
+  if (issueFilter === 'ליאור')   list = list.filter(i => i.employee_name === 'ליאור');
+  if (issueFilter === 'יניב')    list = list.filter(i => i.employee_name === 'יניב');
+  const tbody = document.getElementById('issues-body');
+  if (list.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#bbb;padding:20px">אין בעיות</td></tr>';
+    return;
+  }
+  tbody.innerHTML = list.map(i => {
+    const d = new Date(i.created_at).toLocaleDateString('he-IL');
+    const badge = i.resolved ? '<span class="badge-resolved">טופלה</span>' : '<span class="badge-open">פתוחה</span>';
+    return `<tr>
+      <td><strong>${i.employee_name}</strong></td>
+      <td>${i.trainee_name}</td>
+      <td>${i.issue}</td>
+      <td style="font-size:12px;color:#888;white-space:nowrap">${d}</td>
+      <td>${badge}</td>
+    </tr>`;
+  }).join('');
 }
 
 function renderVideoStats() {
