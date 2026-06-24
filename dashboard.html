@@ -7,7 +7,7 @@
 <title>דשבורד — קורן צבר</title>
 <script>
 (function(){
-  var V='7';
+  var V='8';
   var u=new URL(location.href);
   if(u.searchParams.get('v')!==V){u.searchParams.set('v',V);location.replace(u.toString());}
 })();
@@ -245,12 +245,12 @@ async function loadAll() {
   const [events, leads] = await Promise.all([sbGet('events'), sbGet('leads')]);
   allLeads = Array.isArray(leads) ? leads : [];
   allEvents = Array.isArray(events) ? events : [];
-  renderKanban();
-  renderStats();
-  renderFunnel();
-  renderResultsChart();
-  renderFormsChart();
-  renderVideoStats();
+  try { renderKanban(); } catch(e) { console.error('renderKanban', e); document.getElementById('kanban-board').innerHTML = '<div class="empty" style="color:#c00">שגיאה בטעינת הלידים: ' + e.message + '</div>'; }
+  try { renderStats(); } catch(e) { console.error('renderStats', e); }
+  try { renderFunnel(); } catch(e) { console.error('renderFunnel', e); }
+  try { renderResultsChart(); } catch(e) { console.error('renderResultsChart', e); }
+  try { renderFormsChart(); } catch(e) { console.error('renderFormsChart', e); }
+  try { renderVideoStats(); } catch(e) { console.error('renderVideoStats', e); }
 }
 
 /* ── KANBAN ── */
@@ -278,7 +278,10 @@ function setStatus(key, status) {
 
 function buildLeadRows() {
   return allLeads
-    .map(l => ({ key: l.id, id: l.id, name: l.name, phone: l.phone, age: l.age, result_page: l.result_page, created_at: l.created_at, form_number: Number(l.form_number) }))
+    .map((l, idx) => {
+      const key = l.id || ('lead_' + idx + '_' + (l.created_at || ''));
+      return { key, id: l.id, name: l.name, phone: l.phone, age: l.age, result_page: l.result_page, created_at: l.created_at, form_number: Number(l.form_number) };
+    })
     .filter(r => !isDeleted(r.key, r.created_at))
     .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 }
