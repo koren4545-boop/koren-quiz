@@ -103,6 +103,10 @@
   .funnel-wrap { position: relative; }
   .drop-label { font-size: 11px; color: #c0392b; }
 
+  .period-btn { padding: 6px 14px; border: 1.5px solid #cdd2b0; border-radius: 20px; font-size: 13px; font-family: inherit; background: #fff; cursor: pointer; color: #444; transition: all 0.15s; }
+  .period-btn:hover { background: #f0f4e4; border-color: #4a5c1a; color: #2e3d0e; }
+  .period-btn.active { background: #4a5c1a; border-color: #4a5c1a; color: #fff; font-weight: 600; }
+
   @media (max-width: 750px) {
     .stats-grid { grid-template-columns: repeat(2, 1fr); }
     .charts-row { grid-template-columns: 1fr; }
@@ -150,13 +154,18 @@
 
       <!-- Date filter + clear data -->
       <div class="section-card" style="margin-bottom:20px;padding:16px 22px;">
-        <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
-          <span style="font-size:14px;font-weight:600;color:#1a1a1a;">סנן לפי תאריך:</span>
-          <label style="font-size:13px;color:#555;">מ־ <input type="date" id="filter-from" onchange="applyDateFilter()" style="margin-right:6px;padding:6px 10px;border:1.5px solid #cdd2b0;border-radius:8px;font-size:13px;font-family:inherit;"></label>
-          <label style="font-size:13px;color:#555;">עד <input type="date" id="filter-to" onchange="applyDateFilter()" style="margin-right:6px;padding:6px 10px;border:1.5px solid #cdd2b0;border-radius:8px;font-size:13px;font-family:inherit;"></label>
-          <button onclick="clearDateFilter()" style="padding:6px 14px;border:1.5px solid #cdd2b0;border-radius:8px;font-size:13px;font-family:inherit;background:#fff;cursor:pointer;color:#444;">נקה סינון</button>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+          <span style="font-size:14px;font-weight:600;color:#1a1a1a;">תקופה:</span>
+          <button class="period-btn active" id="period-all" onclick="setPeriod('all',this)">הכל</button>
+          <button class="period-btn" id="period-today" onclick="setPeriod('today',this)">היום</button>
+          <button class="period-btn" id="period-2d" onclick="setPeriod('2d',this)">יומיים אחרונים</button>
+          <button class="period-btn" id="period-7d" onclick="setPeriod('7d',this)">שבוע אחרון</button>
+          <button class="period-btn" id="period-30d" onclick="setPeriod('30d',this)">חודש אחרון</button>
+          <span style="color:#ddd;margin:0 4px">|</span>
+          <label style="font-size:12px;color:#777;">מ־ <input type="date" id="filter-from" onchange="applyDateFilter(true)" style="margin-right:4px;padding:5px 8px;border:1.5px solid #cdd2b0;border-radius:7px;font-size:12px;font-family:inherit;"></label>
+          <label style="font-size:12px;color:#777;">עד <input type="date" id="filter-to" onchange="applyDateFilter(true)" style="margin-right:4px;padding:5px 8px;border:1.5px solid #cdd2b0;border-radius:7px;font-size:12px;font-family:inherit;"></label>
           <div style="flex:1"></div>
-          <button onclick="confirmClearAllData()" style="padding:6px 16px;border:none;border-radius:8px;font-size:13px;font-family:inherit;background:#fee2e2;color:#b91c1c;font-weight:600;cursor:pointer;">🗑 מחק את כל נתוני הבדיקות</button>
+          <button onclick="confirmClearAllData()" style="padding:6px 16px;border:none;border-radius:8px;font-size:13px;font-family:inherit;background:#fee2e2;color:#b91c1c;font-weight:600;cursor:pointer;">🗑 מחק נתונים</button>
         </div>
       </div>
 
@@ -253,7 +262,32 @@ let allLeads = [], allEvents = [];
 let filteredLeads = [], filteredEvents = [];
 let chartFunnel, chartResults, chartForms;
 
-function applyDateFilter() {
+function setPeriod(period, btn) {
+  document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const now = new Date();
+  let fromDate = null;
+  if (period === 'today') {
+    fromDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  } else if (period === '2d') {
+    fromDate = new Date(now - 2 * 24 * 60 * 60 * 1000);
+  } else if (period === '7d') {
+    fromDate = new Date(now - 7 * 24 * 60 * 60 * 1000);
+  } else if (period === '30d') {
+    fromDate = new Date(now - 30 * 24 * 60 * 60 * 1000);
+  }
+  // Clear manual date inputs
+  document.getElementById('filter-from').value = '';
+  document.getElementById('filter-to').value = '';
+  filteredLeads = fromDate ? allLeads.filter(l => new Date(l.created_at) >= fromDate) : allLeads;
+  filteredEvents = fromDate ? allEvents.filter(e => new Date(e.created_at) >= fromDate) : allEvents;
+  renderStats(); renderFunnel(); renderResultsChart(); renderFormsChart(); renderVideoStats();
+}
+
+function applyDateFilter(clearPeriod) {
+  if (clearPeriod) {
+    document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+  }
   const from = document.getElementById('filter-from').value;
   const to = document.getElementById('filter-to').value;
   const fromDate = from ? new Date(from) : null;
@@ -270,14 +304,6 @@ function applyDateFilter() {
     if (toDate && d > toDate) return false;
     return true;
   });
-  renderStats(); renderFunnel(); renderResultsChart(); renderFormsChart(); renderVideoStats();
-}
-
-function clearDateFilter() {
-  document.getElementById('filter-from').value = '';
-  document.getElementById('filter-to').value = '';
-  filteredLeads = allLeads;
-  filteredEvents = allEvents;
   renderStats(); renderFunnel(); renderResultsChart(); renderFormsChart(); renderVideoStats();
 }
 
