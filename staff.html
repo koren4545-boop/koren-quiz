@@ -18,6 +18,9 @@ body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f5; color: #
 .emp-btn { flex: 1; padding: 12px; border: 2px solid #cdd2b0; border-radius: 10px; background: #fff; font-size: 15px; font-family: inherit; cursor: pointer; color: #333; transition: all 0.15s; font-weight: 600; }
 .emp-btn:hover { border-color: #4a5c1a; background: #f0f4e4; }
 .emp-btn.selected { border-color: #4a5c1a; background: #4a5c1a; color: #fff; }
+.emp-btn-admin { border-color: #b45309; color: #b45309; }
+.emp-btn-admin:hover { border-color: #b45309; background: #fef3c7; }
+.emp-btn-admin.selected { background: #b45309; border-color: #b45309; color: #fff; }
 .login-card input { width: 100%; padding: 12px 14px; border: 1.5px solid #cdd2b0; border-radius: 10px; font-size: 15px; font-family: inherit; margin-bottom: 14px; direction: ltr; text-align: center; }
 .login-card input:focus { outline: none; border-color: #4a5c1a; }
 .login-card button.submit { width: 100%; background: #4a5c1a; color: #fff; border: none; border-radius: 10px; padding: 13px; font-size: 16px; font-weight: 700; cursor: pointer; font-family: inherit; }
@@ -75,6 +78,13 @@ body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f5; color: #
 .btn-delete { background: none; border: none; cursor: pointer; color: #ccc; font-size: 16px; padding: 2px 6px; }
 .btn-delete:hover { color: #c0392b; }
 .empty-issues { text-align: center; color: #bbb; font-size: 14px; padding: 28px 0; }
+.filter-btn { padding: 5px 14px; border: 1.5px solid #cdd2b0; border-radius: 20px; font-size: 12px; font-family: inherit; background: #fff; cursor: pointer; color: #444; }
+.filter-btn:hover { border-color: #4a5c1a; color: #2e3d0e; }
+.filter-btn.active { background: #4a5c1a; border-color: #4a5c1a; color: #fff; font-weight: 600; }
+.pay-input { width: 110px; padding: 7px 10px; border: 1.5px solid #cdd2b0; border-radius: 8px; font-size: 14px; font-family: inherit; text-align: center; }
+.pay-input:focus { outline: none; border-color: #4a5c1a; }
+.notes-input { width: 200px; padding: 7px 10px; border: 1.5px solid #cdd2b0; border-radius: 8px; font-size: 13px; font-family: inherit; }
+.notes-input:focus { outline: none; border-color: #4a5c1a; }
 
 @media (max-width: 640px) {
   .stats-grid { grid-template-columns: repeat(2, 1fr); }
@@ -93,10 +103,67 @@ body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f5; color: #
     <div class="employee-btns">
       <button class="emp-btn" onclick="selectEmployee('ליאור', this)">ליאור</button>
       <button class="emp-btn" onclick="selectEmployee('יניב', this)">יניב</button>
+      <button class="emp-btn emp-btn-admin" onclick="selectEmployee('קורן', this)">קורן</button>
     </div>
     <input type="password" id="pwd-input" placeholder="סיסמה" />
     <button class="submit" onclick="doLogin()">כניסה</button>
     <div class="login-err" id="login-err">שם משתמש או סיסמה שגויים</div>
+  </div>
+</div>
+
+<!-- Admin App -->
+<div id="admin-app" style="display:none">
+  <div class="top-bar">
+    <div class="top-bar-title">ניהול יועצים — קורן צבר</div>
+    <div class="top-bar-user">
+      <button class="logout-btn" onclick="doLogout()">התנתקי</button>
+    </div>
+  </div>
+  <div class="main">
+
+    <!-- נתוני יועצים -->
+    <div class="section-card" style="margin-bottom:22px">
+      <div class="section-title" style="margin-bottom:16px">נתוני יועצים</div>
+      <table class="issues-table" id="admin-stats-table">
+        <thead><tr><th>יועץ</th><th>מתאמנים פעילים</th><th>ירדו במשקל</th><th>ביקשו לבטל</th><th>בהקפאה</th><th>עדכון אחרון</th></tr></thead>
+        <tbody id="admin-stats-body"><tr><td colspan="6" style="text-align:center;color:#bbb;padding:20px">טוען...</td></tr></tbody>
+      </table>
+    </div>
+
+    <!-- תשלומים -->
+    <div class="section-card" style="margin-bottom:22px">
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:18px;flex-wrap:wrap;">
+        <div class="section-title" style="margin-bottom:0">תשלומים ליועצים</div>
+        <label style="font-size:13px;color:#555">חודש:
+          <input type="month" id="admin-payment-month" style="margin-right:8px;padding:6px 10px;border:1.5px solid #cdd2b0;border-radius:8px;font-size:13px;font-family:inherit;" onchange="loadAdminPayments()">
+        </label>
+      </div>
+      <table class="issues-table">
+        <thead><tr><th>יועץ</th><th>מתאמנים פעילים</th><th>סכום לתשלום (₪)</th><th>הערות</th></tr></thead>
+        <tbody id="admin-payments-body"></tbody>
+      </table>
+      <div style="margin-top:14px;display:flex;gap:12px;align-items:center;">
+        <button class="btn-primary" onclick="saveAdminPayments()">שמור תשלומים</button>
+        <span id="admin-pay-msg" style="font-size:13px;color:#16a34a;display:none">✓ נשמר</span>
+      </div>
+    </div>
+
+    <!-- בעיות -->
+    <div class="section-card">
+      <div class="section-title" style="margin-bottom:14px">בעיות מדווחות</div>
+      <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
+        <button class="filter-btn active" onclick="filterAdminIssues('all',this)">הכל</button>
+        <button class="filter-btn" onclick="filterAdminIssues('open',this)">פתוחות</button>
+        <button class="filter-btn" onclick="filterAdminIssues('resolved',this)">טופלו</button>
+        <button class="filter-btn" onclick="filterAdminIssues('ליאור',this)">ליאור</button>
+        <button class="filter-btn" onclick="filterAdminIssues('יניב',this)">יניב</button>
+      </div>
+      <table class="issues-table">
+        <thead><tr><th>יועץ</th><th>מתאמן</th><th>בעיה</th><th>תאריך</th><th>סטטוס</th></tr></thead>
+        <tbody id="admin-issues-body"><tr><td colspan="5" style="text-align:center;color:#bbb;padding:20px">טוען...</td></tr></tbody>
+      </table>
+    </div>
+
   </div>
 </div>
 
@@ -167,8 +234,10 @@ const SB_HEADERS = {
 // ── עובדים וסיסמאות ──
 const EMPLOYEES = {
   'ליאור': 'lior2024',
-  'יניב':  'yaniv2024'
+  'יניב':  'yaniv2024',
+  'קורן':  'koren2024'
 };
+const STAFF_NAMES = ['ליאור', 'יניב'];
 
 let currentEmployee = null;
 let selectedName = null;
@@ -190,9 +259,14 @@ function doLogin() {
   if (EMPLOYEES[selectedName] !== pwd) { document.getElementById('login-err').style.display = 'block'; return; }
   currentEmployee = selectedName;
   document.getElementById('login-screen').style.display = 'none';
-  document.getElementById('app').style.display = 'block';
-  document.getElementById('header-name').textContent = 'שלום, ' + currentEmployee;
-  loadData();
+  if (currentEmployee === 'קורן') {
+    document.getElementById('admin-app').style.display = 'block';
+    loadAdminData();
+  } else {
+    document.getElementById('app').style.display = 'block';
+    document.getElementById('header-name').textContent = 'שלום, ' + currentEmployee;
+    loadData();
+  }
 }
 
 function doLogout() {
@@ -202,7 +276,107 @@ function doLogout() {
   document.getElementById('pwd-input').value = '';
   document.getElementById('login-err').style.display = 'none';
   document.getElementById('app').style.display = 'none';
+  document.getElementById('admin-app').style.display = 'none';
   document.getElementById('login-screen').style.display = 'flex';
+}
+
+// ── Admin ──
+let adminReports = [], adminIssues = [], adminPayments = [], adminIssueFilter = 'all';
+
+async function loadAdminData() {
+  const [reports, issues] = await Promise.all([
+    sbGet('staff_reports', 'select=*'),
+    sbGet('staff_issues', 'select=*&order=created_at.desc')
+  ]);
+  adminReports = Array.isArray(reports) ? reports : [];
+  adminIssues  = Array.isArray(issues)  ? issues  : [];
+  renderAdminStats();
+  renderAdminIssues();
+  const now = new Date();
+  const m = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
+  document.getElementById('admin-payment-month').value = m;
+  await loadAdminPayments();
+}
+
+function renderAdminStats() {
+  document.getElementById('admin-stats-body').innerHTML = STAFF_NAMES.map(name => {
+    const r = adminReports.find(r => r.employee_name === name) || {};
+    const upd = r.updated_at ? new Date(r.updated_at).toLocaleDateString('he-IL') : '—';
+    return `<tr>
+      <td><strong>${name}</strong></td>
+      <td style="text-align:center;font-size:20px;font-weight:700;color:#2e3d0e">${r.active_trainees ?? '—'}</td>
+      <td style="text-align:center">${r.weight_loss ?? '—'}</td>
+      <td style="text-align:center">${r.cancellations ?? '—'}</td>
+      <td style="text-align:center">${r.frozen ?? '—'}</td>
+      <td style="font-size:12px;color:#888">${upd}</td>
+    </tr>`;
+  }).join('');
+}
+
+async function loadAdminPayments() {
+  const month = document.getElementById('admin-payment-month').value;
+  if (!month) return;
+  const data = await sbGet('staff_payments', 'month=eq.' + month);
+  adminPayments = Array.isArray(data) ? data : [];
+  const tbody = document.getElementById('admin-payments-body');
+  tbody.innerHTML = STAFF_NAMES.map(name => {
+    const r = adminReports.find(r => r.employee_name === name) || {};
+    const p = adminPayments.find(p => p.employee_name === name) || {};
+    return `<tr>
+      <td><strong>${name}</strong></td>
+      <td style="text-align:center;font-weight:700;color:#2e3d0e">${r.active_trainees ?? 0}</td>
+      <td><input class="pay-input" id="apay-${name}" type="number" min="0" value="${p.amount || ''}" placeholder="0"></td>
+      <td><input class="notes-input" id="anotes-${name}" type="text" value="${p.notes || ''}" placeholder="הערות..."></td>
+    </tr>`;
+  }).join('');
+}
+
+async function saveAdminPayments() {
+  const month = document.getElementById('admin-payment-month').value;
+  if (!month) { alert('נא לבחור חודש'); return; }
+  await Promise.all(STAFF_NAMES.map(name => {
+    const amount = parseFloat(document.getElementById('apay-' + name).value) || 0;
+    const notes  = document.getElementById('anotes-' + name).value.trim();
+    return fetch(SUPABASE_URL + '/rest/v1/staff_payments', {
+      method: 'POST',
+      headers: { ...SB_HEADERS, 'Prefer': 'resolution=merge-duplicates' },
+      body: JSON.stringify({ employee_name: name, month, amount, notes, updated_at: new Date().toISOString() })
+    });
+  }));
+  const msg = document.getElementById('admin-pay-msg');
+  msg.style.display = 'inline';
+  setTimeout(() => msg.style.display = 'none', 2500);
+}
+
+function filterAdminIssues(filter, btn) {
+  adminIssueFilter = filter;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderAdminIssues();
+}
+
+function renderAdminIssues() {
+  let list = adminIssues;
+  if (adminIssueFilter === 'open')     list = list.filter(i => !i.resolved);
+  if (adminIssueFilter === 'resolved') list = list.filter(i => i.resolved);
+  if (adminIssueFilter === 'ליאור')   list = list.filter(i => i.employee_name === 'ליאור');
+  if (adminIssueFilter === 'יניב')    list = list.filter(i => i.employee_name === 'יניב');
+  const tbody = document.getElementById('admin-issues-body');
+  if (list.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#bbb;padding:20px">אין בעיות</td></tr>';
+    return;
+  }
+  tbody.innerHTML = list.map(i => {
+    const d = new Date(i.created_at).toLocaleDateString('he-IL');
+    const badge = i.resolved ? '<span class="badge-resolved">טופלה</span>' : '<span class="badge-open">פתוחה</span>';
+    return `<tr>
+      <td><strong>${i.employee_name}</strong></td>
+      <td>${i.trainee_name}</td>
+      <td>${i.issue}</td>
+      <td style="font-size:12px;color:#888;white-space:nowrap">${d}</td>
+      <td>${badge}</td>
+    </tr>`;
+  }).join('');
 }
 
 // ── Supabase helpers ──
