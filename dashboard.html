@@ -281,9 +281,10 @@ function buildLeadRows() {
   // then fall back to normalized phone, so form2 (trial week) merges with form1 (quiz).
   const byKey = {};
   allLeads.forEach((l, idx) => {
-    const pk = l.session_id
-      || (l.phone || '').replace(/\D/g, '')
-      || (l.name + '|' + (l.age || ''));
+    const normPhone = (l.phone || '').replace(/\D/g, '');
+    // Phone is the primary dedup key — same phone = same person, always merge.
+    // Fall back to session_id, then name+age for leads without a phone.
+    const pk = normPhone || l.session_id || (l.name + '|' + (l.age || ''));
     if (!byKey[pk]) byKey[pk] = [];
     byKey[pk].push({ ...l, _idx: idx });
   });
