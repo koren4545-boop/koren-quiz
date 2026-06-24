@@ -7,7 +7,7 @@
 <title>דשבורד — קורן צבר</title>
 <script>
 (function(){
-  var V='8';
+  var V='9';
   var u=new URL(location.href);
   if(u.searchParams.get('v')!==V){u.searchParams.set('v',V);location.replace(u.toString());}
 })();
@@ -148,6 +148,18 @@
   <div class="tab-panel" id="panel-stats">
     <div class="main">
 
+      <!-- Date filter + clear data -->
+      <div class="section-card" style="margin-bottom:20px;padding:16px 22px;">
+        <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+          <span style="font-size:14px;font-weight:600;color:#1a1a1a;">סנן לפי תאריך:</span>
+          <label style="font-size:13px;color:#555;">מ־ <input type="date" id="filter-from" onchange="applyDateFilter()" style="margin-right:6px;padding:6px 10px;border:1.5px solid #cdd2b0;border-radius:8px;font-size:13px;font-family:inherit;"></label>
+          <label style="font-size:13px;color:#555;">עד <input type="date" id="filter-to" onchange="applyDateFilter()" style="margin-right:6px;padding:6px 10px;border:1.5px solid #cdd2b0;border-radius:8px;font-size:13px;font-family:inherit;"></label>
+          <button onclick="clearDateFilter()" style="padding:6px 14px;border:1.5px solid #cdd2b0;border-radius:8px;font-size:13px;font-family:inherit;background:#fff;cursor:pointer;color:#444;">נקה סינון</button>
+          <div style="flex:1"></div>
+          <button onclick="confirmClearAllData()" style="padding:6px 16px;border:none;border-radius:8px;font-size:13px;font-family:inherit;background:#fee2e2;color:#b91c1c;font-weight:600;cursor:pointer;">🗑 מחק את כל נתוני הבדיקות</button>
+        </div>
+      </div>
+
       <!-- KPI cards -->
       <div class="stats-grid">
         <div class="stat-card"><div class="num" id="s-visitors">—</div><div class="label">נכנסו לשאלון</div></div>
@@ -238,13 +250,58 @@ async function sbGet(table, params) {
 }
 
 let allLeads = [], allEvents = [];
+let filteredLeads = [], filteredEvents = [];
 let chartFunnel, chartResults, chartForms;
+
+function applyDateFilter() {
+  const from = document.getElementById('filter-from').value;
+  const to = document.getElementById('filter-to').value;
+  const fromDate = from ? new Date(from) : null;
+  const toDate = to ? new Date(to + 'T23:59:59') : null;
+  filteredLeads = allLeads.filter(l => {
+    const d = new Date(l.created_at);
+    if (fromDate && d < fromDate) return false;
+    if (toDate && d > toDate) return false;
+    return true;
+  });
+  filteredEvents = allEvents.filter(e => {
+    const d = new Date(e.created_at);
+    if (fromDate && d < fromDate) return false;
+    if (toDate && d > toDate) return false;
+    return true;
+  });
+  renderStats(); renderFunnel(); renderResultsChart(); renderFormsChart(); renderVideoStats();
+}
+
+function clearDateFilter() {
+  document.getElementById('filter-from').value = '';
+  document.getElementById('filter-to').value = '';
+  filteredLeads = allLeads;
+  filteredEvents = allEvents;
+  renderStats(); renderFunnel(); renderResultsChart(); renderFormsChart(); renderVideoStats();
+}
+
+async function confirmClearAllData() {
+  if (!confirm('למחוק את כל הנתונים (ביקורים, לידים) לצמיתות?\nפעולה זו בלתי הפיכה!')) return;
+  const confirmed = prompt('כדי לאשר, הקלד "מחק" בשדה:');
+  if (confirmed !== 'מחק') { alert('בוטל'); return; }
+  await Promise.all([
+    fetch(SUPABASE_URL + '/rest/v1/events?id=neq.00000000-0000-0000-0000-000000000000', { method: 'DELETE', headers: SB_HEADERS }),
+    fetch(SUPABASE_URL + '/rest/v1/leads?id=neq.00000000-0000-0000-0000-000000000000', { method: 'DELETE', headers: SB_HEADERS })
+  ]);
+  alert('הנתונים נמחקו בהצלחה');
+  loadAll();
+}
 
 async function loadAll() {
   document.getElementById('kanban-board').innerHTML = '<div class="empty" style="padding:60px 40px">טוען...</div>';
   const [events, leads] = await Promise.all([sbGet('events'), sbGet('leads')]);
   allLeads = Array.isArray(leads) ? leads : [];
   allEvents = Array.isArray(events) ? events : [];
+  // Apply existing date filter if set, otherwise use all data
+  const from = document.getElementById('filter-from') && document.getElementById('filter-from').value;
+  const to = document.getElementById('filter-to') && document.getElementById('filter-to').value;
+  if (from || to) { applyDateFilter(); } else { filteredLeads = allLeads; filteredEvents = allEvents; }
   try { renderKanban(); } catch(e) { console.error('renderKanban', e); document.getElementById('kanban-board').innerHTML = '<div class="empty" style="color:#c00">שגיאה בטעינת הלידים: ' + e.message + '</div>'; }
   try { renderStats(); } catch(e) { console.error('renderStats', e); }
   try { renderFunnel(); } catch(e) { console.error('renderFunnel', e); }
@@ -396,26 +453,26 @@ function isDeleted(key, latestCreatedAt) {
 /* ── STATS TAB ── */
 
 function renderStats() {
-  const visitors = new Set(allEvents.filter(e => e.event_type === 'page_view' && (e.page === 'index.html' || e.page === '' || e.page === '/')).map(e => e.session_id)).size;
-  const completionSessions = new Set(allEvents.filter(e => e.event_type === 'result_reached').map(e => e.session_id));
-  const leadSessions = new Set(allLeads.map(l => l.session_id));
+  const visitors = new Set(filteredEvents.filter(e => e.event_type === 'page_view' && (e.page === 'index.html' || e.page === '' || e.page === '/')).map(e => e.session_id)).size;
+  const completionSessions = new Set(filteredEvents.filter(e => e.event_type === 'result_reached').map(e => e.session_id));
+  const leadSessions = new Set(filteredLeads.map(l => l.session_id));
   const completedNoLead = [...completionSessions].filter(s => !leadSessions.has(s)).length;
 
   document.getElementById('s-visitors').textContent = visitors;
   document.getElementById('s-completions').textContent = completionSessions.size;
   document.getElementById('s-completed-no-lead').textContent = completedNoLead;
-  document.getElementById('s-leads').textContent = allLeads.length;
+  document.getElementById('s-leads').textContent = filteredLeads.length;
 }
 
 function renderFunnel() {
   const labels = ['נכנסו', 'ש׳1', 'ש׳2', 'ש׳3', 'ש׳4', 'ש׳5', 'ש׳6', 'ש׳7', 'טופס', 'סרטון'];
   const counts = [
-    new Set(allEvents.filter(e => e.event_type === 'page_view' && (e.page === 'index.html' || e.page === '' || e.page === '/')).map(e => e.session_id)).size,
+    new Set(filteredEvents.filter(e => e.event_type === 'page_view' && (e.page === 'index.html' || e.page === '' || e.page === '/')).map(e => e.session_id)).size,
     ...Array.from({length: 7}, (_, i) =>
-      new Set(allEvents.filter(e => e.event_type === 'question_answered' && e.step === i).map(e => e.session_id)).size
+      new Set(filteredEvents.filter(e => e.event_type === 'question_answered' && e.step === i).map(e => e.session_id)).size
     ),
-    new Set(allEvents.filter(e => e.event_type === 'form_view').map(e => e.session_id)).size,
-    new Set(allEvents.filter(e => e.event_type === 'result_reached').map(e => e.session_id)).size
+    new Set(filteredEvents.filter(e => e.event_type === 'form_view').map(e => e.session_id)).size,
+    new Set(filteredEvents.filter(e => e.event_type === 'result_reached').map(e => e.session_id)).size
   ];
   if (chartFunnel) chartFunnel.destroy();
   chartFunnel = new Chart(document.getElementById('chart-funnel'), {
@@ -442,7 +499,7 @@ function renderFunnel() {
 
 function renderResultsChart() {
   const counts = PAGE_KEYS.map(k =>
-    new Set(allEvents.filter(e => e.event_type === 'result_reached' && e.page === k).map(e => e.session_id)).size
+    new Set(filteredEvents.filter(e => e.event_type === 'result_reached' && e.page === k).map(e => e.session_id)).size
   );
   if (chartResults) chartResults.destroy();
   chartResults = new Chart(document.getElementById('chart-results'), {
@@ -458,7 +515,7 @@ function renderResultsChart() {
 function renderFormsChart() {
   // Per unique phone: how many submitted form1 only, form2 only, both
   const byPhone = {};
-  allLeads.forEach(l => {
+  filteredLeads.forEach(l => {
     const key = (l.phone || '').replace(/\D/g, '') || l.name;
     if (!byPhone[key]) byPhone[key] = { form1: false, form2: false };
     if (l.form_number === 1) byPhone[key].form1 = true;
@@ -485,10 +542,10 @@ function renderVideoStats() {
     const label = PAGE_LABELS[page];
 
     // Sessions that reached this page
-    const reachedSessions = new Set(allEvents.filter(e => e.event_type === 'result_reached' && e.page === page).map(e => e.session_id));
+    const reachedSessions = new Set(filteredEvents.filter(e => e.event_type === 'result_reached' && e.page === page).map(e => e.session_id));
 
     // Avg time on page (page_time events)
-    const pageTimes = allEvents
+    const pageTimes = filteredEvents
       .filter(e => e.event_type === 'page_time' && e.page === page && e.data && e.data.seconds_on_page)
       .reduce((acc, e) => {
         const s = e.session_id;
@@ -499,7 +556,7 @@ function renderVideoStats() {
     const avgPageTime = pageTimeVals.length ? Math.round(pageTimeVals.reduce((a,b) => a+b,0) / pageTimeVals.length) : '—';
 
     // Avg video watch time
-    const videoEvents = allEvents.filter(e => e.event_type === 'video_watch' && (e.page === page || (e.data && e.data.page === page)) && e.data && e.data.seconds_watched);
+    const videoEvents = filteredEvents.filter(e => e.event_type === 'video_watch' && (e.page === page || (e.data && e.data.page === page)) && e.data && e.data.seconds_watched);
     const videoBySession = {};
     videoEvents.forEach(e => {
       const s = e.session_id;
@@ -510,8 +567,8 @@ function renderVideoStats() {
     const avgVideo = videoVals.length ? Math.round(videoVals.reduce((a,b) => a+b,0) / videoVals.length) : '—';
 
     // Leads form 1 and form 2 for this page
-    const leads1 = new Set(allLeads.filter(l => l.result_page === page && l.form_number === 1).map(l => (l.phone||'').replace(/\D/g,'')||l.name)).size;
-    const leads2 = new Set(allLeads.filter(l => l.result_page === page && l.form_number === 2).map(l => (l.phone||'').replace(/\D/g,'')||l.name)).size;
+    const leads1 = new Set(filteredLeads.filter(l => l.result_page === page && l.form_number === 1).map(l => (l.phone||'').replace(/\D/g,'')||l.name)).size;
+    const leads2 = new Set(filteredLeads.filter(l => l.result_page === page && l.form_number === 2).map(l => (l.phone||'').replace(/\D/g,'')||l.name)).size;
 
     return { label, reached: reachedSessions.size, avgPageTime, avgVideo, leads1, leads2 };
   });
