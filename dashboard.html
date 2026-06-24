@@ -277,10 +277,13 @@ function setStatus(key, status) {
 }
 
 function buildLeadRows() {
-  // Group by phone (or name+age) so form2 updates the existing lead instead of creating a new one
+  // Deduplicate: group by session_id first (most reliable — same browser session),
+  // then fall back to normalized phone, so form2 (trial week) merges with form1 (quiz).
   const byKey = {};
   allLeads.forEach((l, idx) => {
-    const pk = (l.phone || '').replace(/\D/g, '') || (l.name + '|' + (l.age || ''));
+    const pk = l.session_id
+      || (l.phone || '').replace(/\D/g, '')
+      || (l.name + '|' + (l.age || ''));
     if (!byKey[pk]) byKey[pk] = [];
     byKey[pk].push({ ...l, _idx: idx });
   });
@@ -291,13 +294,12 @@ function buildLeadRows() {
     const canonical = form1 || form2;
     const idx = canonical._idx;
     const key = canonical.id || ('lead_' + idx + '_' + (canonical.created_at || ''));
-    // Use the latest created_at for sorting (form2 if exists)
     const latest = form2 || form1;
     return {
       key,
       id: canonical.id,
       name: canonical.name,
-      phone: canonical.phone,
+      phone: canonical.phone || (form2 && form2.phone) || '',
       age: canonical.age,
       result_page: canonical.result_page,
       created_at: latest.created_at,
