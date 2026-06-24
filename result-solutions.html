@@ -145,6 +145,7 @@ src="https://www.facebook.com/tr?id=1402505278000430&ev=PageView&noscript=1"
     const a = document.getElementById('f-age').value.trim();
     if (!n || !p || !a) { alert('נא למלא את כל השדות'); return; }
     trackLead(n, p, a, 'result-solutions.html', 2);
+    if (typeof fbq !== 'undefined') fbq('track', 'Lead');
     document.getElementById('form-area').style.display = 'none';
     document.getElementById('thanks-area').style.display = 'block';
   }
@@ -168,6 +169,7 @@ src="https://www.facebook.com/tr?id=1402505278000430&ev=PageView&noscript=1"
     const a = document.getElementById('f2-age').value.trim();
     if (!n || !p || !a) { alert('נא למלא את כל השדות'); return; }
     await trackLead(n, p, a, 'result-solutions.html', 2);
+    if (typeof fbq !== 'undefined') fbq('track', 'Lead');
     document.getElementById('form2-area').style.display = 'none';
     document.getElementById('thanks2-area').style.display = 'block';
   }

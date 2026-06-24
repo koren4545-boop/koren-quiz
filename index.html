@@ -487,6 +487,7 @@ async function submitForm() {
   btn.textContent = 'שולחת...';
   await trackLead(name, phone, age, resultPages[winner], 1);
   await trackEvent('form_submitted', {step: 7, result_page: resultPages[winner], form_number: 1});
+  if (typeof fbq !== 'undefined') fbq('track', 'Lead');
   window.location.href = resultPages[winner] + '?' + params.toString();
 }
 </script>
