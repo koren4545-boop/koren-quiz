@@ -34,9 +34,24 @@ function trackEvent(eventType, extra) {
   });
 }
 
-function trackLead(name, phone, age, resultPage, formNumber) {
+async function trackLead(name, phone, age, resultPage, formNumber) {
+  const sid = getSessionId();
+  if (formNumber === 2) {
+    // Try to update the existing form1 lead for this session instead of inserting a new row
+    const existing = await fetch(
+      SUPABASE_URL + '/rest/v1/leads?session_id=eq.' + encodeURIComponent(sid) + '&form_number=eq.1&limit=1',
+      { headers: SB_HEADERS }
+    ).then(r => r.json()).catch(() => []);
+    if (Array.isArray(existing) && existing.length > 0) {
+      return fetch(SUPABASE_URL + '/rest/v1/leads?id=eq.' + existing[0].id, {
+        method: 'PATCH',
+        headers: { ...SB_HEADERS, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ form_number: 2 })
+      }).catch(() => {});
+    }
+  }
   return sbPost('leads', {
-    session_id: getSessionId(),
+    session_id: sid,
     name: name,
     phone: phone,
     age: parseInt(age) || null,
