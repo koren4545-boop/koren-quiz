@@ -398,8 +398,8 @@ function renderAdminIssues() {
 
 // ── Supabase helpers ──
 async function sbGet(table, params) {
-  const res = await fetch(SUPABASE_URL + '/rest/v1/' + table + '?' + params + '&_t=' + Date.now(), {
-    headers: SB_HEADERS,
+  const res = await fetch(SUPABASE_URL + '/rest/v1/' + table + '?' + params, {
+    headers: { ...SB_HEADERS, 'Cache-Control': 'no-cache' },
     cache: 'no-store'
   });
   return res.json();
