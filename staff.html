@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v2 -->
+<!-- v3 -->
 <html lang="he" dir="rtl">
 <head>
 <meta charset="UTF-8">
@@ -39,7 +39,7 @@ body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f5; color: #
 
 /* Stats section */
 .section-title { font-size: 17px; font-weight: 700; color: #1a1a1a; margin-bottom: 16px; }
-.stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 10px; }
+.stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 10px; }
 .stat-card { background: #fff; border-radius: 14px; padding: 20px 16px; text-align: center; border: 1.5px solid #e8ede9; }
 .stat-card .stat-label { font-size: 12px; color: #666; margin-bottom: 10px; line-height: 1.4; font-weight: 600; }
 .stat-card input[type=number] { width: 100%; border: 1.5px solid #cdd2b0; border-radius: 8px; padding: 10px; font-size: 28px; font-weight: 700; color: #2e3d0e; text-align: center; font-family: inherit; }
@@ -123,10 +123,13 @@ body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f5; color: #
 
     <!-- נתוני יועצים -->
     <div class="section-card" style="margin-bottom:22px">
-      <div class="section-title" style="margin-bottom:16px">נתוני יועצים</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+        <div class="section-title" style="margin-bottom:0">נתוני יועצים</div>
+        <button class="btn-primary" style="padding:8px 18px;font-size:13px;" onclick="loadAdminData()">⟳ רענן נתונים</button>
+      </div>
       <table class="issues-table" id="admin-stats-table">
-        <thead><tr><th>יועץ</th><th>מתאמנים פעילים</th><th>ירדו במשקל</th><th>ביקשו לבטל</th><th>בהקפאה</th><th>עדכון אחרון</th></tr></thead>
-        <tbody id="admin-stats-body"><tr><td colspan="6" style="text-align:center;color:#bbb;padding:20px">טוען...</td></tr></tbody>
+        <thead><tr><th>יועץ</th><th>פעילים</th><th>חדשים החודש</th><th>סיימו החודש</th><th>ירדו במשקל</th><th>ביקשו לבטל</th><th>בהקפאה</th><th>עדכון אחרון</th></tr></thead>
+        <tbody id="admin-stats-body"><tr><td colspan="8" style="text-align:center;color:#bbb;padding:20px">טוען...</td></tr></tbody>
       </table>
     </div>
 
@@ -197,6 +200,14 @@ body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f5; color: #
       <div class="stat-card">
         <div class="stat-label">בהקפאה</div>
         <input type="number" id="s-frozen" min="0" value="0">
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">מתאמנים חדשים החודש</div>
+        <input type="number" id="s-new" min="0" value="0">
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">סיימו תהליך החודש</div>
+        <input type="number" id="s-completed" min="0" value="0">
       </div>
     </div>
     <div class="save-stats-row">
@@ -302,12 +313,15 @@ function renderAdminStats() {
   document.getElementById('admin-stats-body').innerHTML = STAFF_NAMES.map(name => {
     const r = adminReports.find(r => r.employee_name === name) || {};
     const upd = r.updated_at ? new Date(r.updated_at).toLocaleDateString('he-IL') : '—';
+    const val = v => (v != null && v !== '') ? v : '—';
     return `<tr>
       <td><strong>${name}</strong></td>
-      <td style="text-align:center;font-size:20px;font-weight:700;color:#2e3d0e">${r.active_trainees ?? '—'}</td>
-      <td style="text-align:center">${r.weight_loss ?? '—'}</td>
-      <td style="text-align:center">${r.cancellations ?? '—'}</td>
-      <td style="text-align:center">${r.frozen ?? '—'}</td>
+      <td style="text-align:center;font-size:20px;font-weight:700;color:#2e3d0e">${val(r.active_trainees)}</td>
+      <td style="text-align:center;color:#1d6f42;font-weight:600">${val(r.new_trainees)}</td>
+      <td style="text-align:center;color:#7c3aed;font-weight:600">${val(r.completed_trainees)}</td>
+      <td style="text-align:center">${val(r.weight_loss)}</td>
+      <td style="text-align:center">${val(r.cancellations)}</td>
+      <td style="text-align:center">${val(r.frozen)}</td>
       <td style="font-size:12px;color:#888">${upd}</td>
     </tr>`;
   }).join('');
@@ -394,21 +408,25 @@ async function loadStats() {
   const data = await sbGet('staff_reports', 'employee_name=eq.' + encodeURIComponent(currentEmployee) + '&limit=1');
   if (Array.isArray(data) && data.length > 0) {
     const r = data[0];
-    document.getElementById('s-active').value  = r.active_trainees || 0;
-    document.getElementById('s-weight').value  = r.weight_loss || 0;
-    document.getElementById('s-cancel').value  = r.cancellations || 0;
-    document.getElementById('s-frozen').value  = r.frozen || 0;
+    document.getElementById('s-active').value     = r.active_trainees || 0;
+    document.getElementById('s-weight').value     = r.weight_loss || 0;
+    document.getElementById('s-cancel').value     = r.cancellations || 0;
+    document.getElementById('s-frozen').value     = r.frozen || 0;
+    document.getElementById('s-new').value        = r.new_trainees || 0;
+    document.getElementById('s-completed').value  = r.completed_trainees || 0;
   }
 }
 
 async function saveStats() {
   const payload = {
-    employee_name:    currentEmployee,
-    active_trainees:  parseInt(document.getElementById('s-active').value) || 0,
-    weight_loss:      parseInt(document.getElementById('s-weight').value) || 0,
-    cancellations:    parseInt(document.getElementById('s-cancel').value) || 0,
-    frozen:           parseInt(document.getElementById('s-frozen').value) || 0,
-    updated_at:       new Date().toISOString()
+    employee_name:       currentEmployee,
+    active_trainees:     parseInt(document.getElementById('s-active').value) || 0,
+    weight_loss:         parseInt(document.getElementById('s-weight').value) || 0,
+    cancellations:       parseInt(document.getElementById('s-cancel').value) || 0,
+    frozen:              parseInt(document.getElementById('s-frozen').value) || 0,
+    new_trainees:        parseInt(document.getElementById('s-new').value) || 0,
+    completed_trainees:  parseInt(document.getElementById('s-completed').value) || 0,
+    updated_at:          new Date().toISOString()
   };
   await fetch(SUPABASE_URL + '/rest/v1/staff_reports', {
     method: 'POST',
