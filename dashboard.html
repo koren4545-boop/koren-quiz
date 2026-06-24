@@ -277,11 +277,33 @@ function setStatus(key, status) {
 }
 
 function buildLeadRows() {
-  return allLeads
-    .map((l, idx) => {
-      const key = l.id || ('lead_' + idx + '_' + (l.created_at || ''));
-      return { key, id: l.id, name: l.name, phone: l.phone, age: l.age, result_page: l.result_page, created_at: l.created_at, form_number: Number(l.form_number) };
-    })
+  // Group by phone (or name+age) so form2 updates the existing lead instead of creating a new one
+  const byKey = {};
+  allLeads.forEach((l, idx) => {
+    const pk = (l.phone || '').replace(/\D/g, '') || (l.name + '|' + (l.age || ''));
+    if (!byKey[pk]) byKey[pk] = [];
+    byKey[pk].push({ ...l, _idx: idx });
+  });
+
+  return Object.values(byKey).map(group => {
+    const form1 = group.find(l => Number(l.form_number) === 1);
+    const form2 = group.find(l => Number(l.form_number) === 2);
+    const canonical = form1 || form2;
+    const idx = canonical._idx;
+    const key = canonical.id || ('lead_' + idx + '_' + (canonical.created_at || ''));
+    // Use the latest created_at for sorting (form2 if exists)
+    const latest = form2 || form1;
+    return {
+      key,
+      id: canonical.id,
+      name: canonical.name,
+      phone: canonical.phone,
+      age: canonical.age,
+      result_page: canonical.result_page,
+      created_at: latest.created_at,
+      form_number: form2 ? 2 : Number(canonical.form_number)
+    };
+  })
     .filter(r => !isDeleted(r.key, r.created_at))
     .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 }
