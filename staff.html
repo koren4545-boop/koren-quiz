@@ -435,24 +435,37 @@ async function saveStats() {
   };
   const msg = document.getElementById('save-msg');
 
-  // נסה PATCH קודם (עדכון שורה קיימת)
-  const patchRes = await fetch(
-    SUPABASE_URL + '/rest/v1/staff_reports?employee_name=eq.' + encodeURIComponent(currentEmployee),
-    { method: 'PATCH', headers: { ...SB_HEADERS, 'Content-Type': 'application/json', 'Prefer': 'return=representation' }, body: JSON.stringify(payload) }
-  );
-  const patched = await patchRes.json();
+  try {
+    // בדוק אם קיימת שורה
+    const existing = await fetch(
+      SUPABASE_URL + '/rest/v1/staff_reports?employee_name=eq.' + encodeURIComponent(currentEmployee) + '&select=id',
+      { headers: SB_HEADERS, cache: 'no-store' }
+    ).then(r => r.json());
 
-  // אם אין שורה קיימת — INSERT
-  if (!Array.isArray(patched) || patched.length === 0) {
-    await fetch(SUPABASE_URL + '/rest/v1/staff_reports', {
-      method: 'POST',
-      headers: { ...SB_HEADERS, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ employee_name: currentEmployee, ...payload })
-    });
+    if (Array.isArray(existing) && existing.length > 0) {
+      // PATCH — עדכון
+      await fetch(
+        SUPABASE_URL + '/rest/v1/staff_reports?employee_name=eq.' + encodeURIComponent(currentEmployee),
+        { method: 'PATCH', headers: SB_HEADERS, body: JSON.stringify(payload) }
+      );
+    } else {
+      // INSERT — שורה חדשה
+      await fetch(SUPABASE_URL + '/rest/v1/staff_reports', {
+        method: 'POST',
+        headers: SB_HEADERS,
+        body: JSON.stringify({ employee_name: currentEmployee, ...payload })
+      });
+    }
+
+    msg.textContent = '✓ נשמר בהצלחה';
+    msg.style.color = '#16a34a';
+  } catch(e) {
+    msg.textContent = 'שגיאה בשמירה';
+    msg.style.color = '#c0392b';
   }
 
   msg.style.display = 'inline';
-  setTimeout(() => msg.style.display = 'none', 2500);
+  setTimeout(() => msg.style.display = 'none', 3000);
 }
 
 // ── Issues ──
